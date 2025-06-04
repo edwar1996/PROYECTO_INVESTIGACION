@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="/static/style/module.css?v=1.0">
+<link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+<link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<!-- JS de jQuery y DataTables -->
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<style>
+
+    .extra-item {
+        display: none;
+        background-color: #1ab394;
+        border-radius: 15px;
+        font-size: 16px;
+        color: #ffff;
+        margin-left: 20px;
+        transition: all 0.3s ease-in-out;
+        height: 43px;
+    }
+    
+    .cedula {
+        width: 14%;
+        padding: 12px 14px;
+        font-size: 15px;
+        border: 1px solid #ccd6dd;
+        border-radius: 6px;
+        background-color: #ffffff;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+      
+      .cedula:focus {
+        border-color: #a8200e;
+        box-shadow: 0 0 0 3px rgba(29, 114, 184, 0.2);
+        outline: none;
+      }
+
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"> <h2><i class="fas fa-bars"></i>
+                &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                  <li><a href="{{ url_for('docente.docente') }}"><i class="fas fa-home"></i> Estudiantes</a></li>
+                    <li><a href="#" id="generar-link"><i class="fas fa-users"></i> Generar</a></li>
+                    <li class="extra-item" id="item1"><a href="{{ url_for('docente.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>  &nbsp;&nbsp;Situación 1</a></li>
+                    <li class="extra-item" id="item2"><a href="{{ url_for('generar2.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 2</a></li>
+                    <li class="extra-item" id="item3"><a href="{{ url_for('generar3.generarf') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 3</a></li>
+
+                    <li><a href="{{ url_for('estado_estudiantil.mostrar_casos') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+ 
+                <li><a href="{{ url_for('docente.ver_observaciones') }}" onclick="showSection('estadisticas')"><i class="fa-brands fa-slack"></i> Observaciones</a></li>
+                                   <li>
+    <a href="{{ url_for('estado_estudiantil.mostrar_historico') }}">
+        <i class="fas fa-archive"></i> Historial
+    </a>
+</li>
+                
+                </ul>
+            </nav>
+
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                     <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+                    <!-- Aquí comienza el área para los mensajes flash -->
+                    <div id="flash-messages">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <ul>
+                                    {% for category, message in messages %}
+                                    <script>
+                        
+                                        alert("{{ message }}");
+                                  
+                                </script>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+            <header class="header">
+                <div class="greeting">
+                    <h2>Proceso Disciplinario 3</h2>
+                </div>
+                
+                <div class="user-info">
+                    <img src="/static/img/inem.png" alt="" srcset="" class="img-user">
+                    
+                    {% if session['rol'] %}
+                    <div class="user-details">
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    {% endif %}
+                    </div>
+                </div>
+            </header>
+            
+
+            <section id="inicio" class="section-content">
+
+                <div>
+                    <label for="cedulaInput" >Número de Identificación:</label>
+                    <input type="Number" id="cedulaInput" placeholder="Ingrese número de identificación" class="cedula">
+                    <button onclick="generarPDF3()" class="eliminar-usuario" style="height: 42px;"><span>Generar PDF</span></button>
+                </div>
+
+    <!-- Botón para abrir el modal -->
+    <button id="btnAbrirModal" class="crear-usuario"><span>Registrar Situación</span></button>
+
+    
+    {% if registros %}
+    <div class="table-responsive" style="overflow-y: auto;overflow-x: auto;border: 1px solid #dee2e6;width: 100%;height: 67%; margin-left: -7px;margin-top: 3.5%;">
+        <table id="estudiantesTable" class="table table-bordered align-middle" style="margin-left: 0;">
+            <thead class="table-light" style="position: sticky; top: 0; z-index: 1; background-color: white;">
+            <tr>
+                <th>Id</th>
+                <th>identificacion</th>
+                <th>Nombres</th>
+                <th>Apellidos</th>
+                <th>Grado</th>
+                <th>Sección</th>
+                <th>Jornada</th>
+                <th>IdAcudiente</th>
+                <th>Nombre Acudiente</th>
+                <th>Apellido Acudiente</th>
+                <th>CorreoAcudiente</th>
+                <th>Teléfono Acudiente</th>
+                <th> Estudiante Mediador 1</th>
+                <th>Estudiante Mediador 2</th>
+                <th>Nombre Docente</th>
+                <th>Evidencia Fotografica</th>
+                <!-- Add other columns as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for registro in registros %}
+                <tr>
+                    <td>{{ registro[0] }}</td>
+                    <td>{{ registro[1] }}</td>
+                    <td>{{ registro[2] }}</td>
+                    <td>{{ registro[3] }}</td>
+                    <td>{{ registro[4] }}</td>
+                    <td>{{ registro[5] }}</td>
+                    <td>{{ registro[6] }}</td>
+                    <td>{{ registro[7] }}</td>
+                    <td>{{ registro[8] }}</td>
+                    <td>{{ registro[9] }}</td>
+                    <td>{{ registro[10] }}</td>
+                    <td>{{ registro[11] }}</td>   <!-- TELEfono-->
+                    <td>{{ registro[15] }}</td>     <!-- MEDIADOR1-->
+                    <td>{{ registro[16] }}</td>       <!-- MEDIADOR2-->
+                    <td>{{ registro[17] }}</td>        <!-- NOMBRE DOCENTE -->
+                    <td>{{ registro[16] }}</td>
+                    
+             
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">
+        No hay registros disponibles.
+    </div>
+{% endif %}
+</div>
+<h5 style="margin-top: 20px;"><hr></h5>
+ <br><br>
+ <h1>Estadísticas por proceso</h1>
+<button class="excel" id="exportarExcel"><span>Exportar Excel</span></button>
+
+<br><br>
+
+<h5 style="margin-top: 30px;">Estadísticas Generales</h5>
+<div style="display: flex; justify-content: space-between; gap: 20px;">
+    <div style="flex: 1; min-width: 200px; background: #fff; border-radius: 50px; height: 300px">
+        <h6>Estudiantes por Grado</h6>
+        <canvas id="chartGrado2" width="400" height="250"></canvas>
+    </div>
+    <div style="flex: 1;min-width: 181px;height: 263px;background: #fff;border-radius: 50px;">
+        <h6>Distribución por Jornada</h6>
+        <canvas id="chartJornada2" width="400" height="250" style="margin-left: 29%;"></canvas>
+    </div>
+</div>
+
+</div>
+
+
+<script>
+      
+document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("estudiantesTable");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    const estudiantesPorGrado = {};
+    const estudiantesPorJornada = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+
+        const grado = celdas[4]?.innerText.trim();    // Grado
+        const jornada = celdas[6]?.innerText.trim();  // Jornada
+
+        // Contar estudiantes por grado
+        if (grado in estudiantesPorGrado) {
+            estudiantesPorGrado[grado]++;
+        } else {
+            estudiantesPorGrado[grado] = 1;
+        }
+
+        // Contar estudiantes por jornada
+        if (jornada in estudiantesPorJornada) {
+            estudiantesPorJornada[jornada]++;
+        } else {
+            estudiantesPorJornada[jornada] = 1;
+        }
+    });
+
+    // --- Gráfico de barras por grado ---
+    const grados = Object.keys(estudiantesPorGrado);
+    const conteoGrados = Object.values(estudiantesPorGrado);
+
+    new Chart(document.getElementById('chartGrado2'), {
+        type: 'bar',
+        data: {
+            labels: grados,
+            datasets: [{
+                label: 'Cantidad de Estudiantes',
+                data: conteoGrados,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // --- Gráfico de pastel por jornada ---
+    const jornadas = Object.keys(estudiantesPorJornada);
+    const conteoJornadas = Object.values(estudiantesPorJornada);
+
+    new Chart(document.getElementById('chartJornada2'), {
+        type: 'pie',
+        data: {
+            labels: jornadas,
+            datasets: [{
+                data: conteoJornadas,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#9966FF',
+                    '#4BC0C0'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+
+<!-- Modal -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+             <h2>Formulario de Registro</h2>
+            <span class="close">&times;</span>
+           
+        </div>
+        <div class="modal-body">
+            <!-- Formulario dentro del Modal -->
+            <form method="POST" action="{{ url_for('generar3.registrar_proceso3') }}" enctype="multipart/form-data">
+                <div class="row">
+                    <!-- Campo de Identificación -->
+                    <div class="col-md-6">
+                        <label for="numeroTI" class="form-label">Número de documento</label>
+                        <input type="text" name="numeroTI" id="numeroTI" class="form-control" placeholder="Ingrese cédula o TI" required>
+                    </div>
+
+                    <!-- Campos de Información del Estudiante -->
+                    <div class="col-md-6">
+                        <label for="nombresEstudiante" class="form-label">Nombres del estudiante</label>
+                        <input type="text" name="nombresEstudiante" id="nombresEstudiante" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellidosEstudiante" class="form-label">Apellidos del estudiante</label>
+                        <input type="text" name="apellidosEstudiante" id="apellidosEstudiante" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="grado" class="form-label">Grado</label>
+                        <input type="text" name="grado" id="grado" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="seccion" class="form-label">Sección</label>
+                        <input type="text" name="seccion" id="seccion" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jornada" class="form-label">Jornada</label>
+                        <input type="text" name="jornada" id="jornada" class="form-control" readonly>
+                    </div>
+
+                    <!-- Información del Acudiente -->
+                    <div class="col-md-6">
+                        <label for="idacu" class="form-label">ID Acudiente</label>
+                        <input type="text" name="idacu" id="idacu" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nom_acu" class="form-label">Nombre Acudiente</label>
+                        <input type="text" name="nom_acu" id="nom_acu" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ape_acu" class="form-label">Apellido Acudiente</label>
+                        <input type="text" name="ape_acu" id="ape_acu" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="tel_acu" class="form-label">Teléfono Acudiente</label>
+                        <input type="text" name="tel_acu" id="tel_acu" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cor_acu" class="form-label">Correo Acudiente</label>
+                        <input type="email" name="cor_acu" id="cor_acu" class="form-control" readonly>
+                    </div>
+
+                    <!-- Campos de Mediador -->
+                    <div class="col-md-6">
+                        <label for="pactosocial" class="form-label">Pacto Social Convivencia: <span style="color: red;">*</span></label>
+                        <textarea name="pactosocial" id="pactosocial" required class="form-control"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="pactosocial" class="form-label"> Descargos:<span style="color: red;">*</span></label>
+                        <textarea name="descargos" id="descargos" required class="form-control"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="caso" class="form-label">Estudio del caso: </label>
+                        <textarea name="caso" id="caso"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="jefe" class="form-label">Jefe de la sección:</label>
+                        <input type="text" name="jefe" id="jefe" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="docente" class="form-label">Docente:</label>
+                        <input type="text" name="docente" id="docente" class="form-control" value="{{ session['nombres'] }} {{ session['apellidos'] }}" readonly>
+                    </div>
+
+               
+                </div>
+
+                <div class="modal-footer mt-4">
+                    <center>
+                    <button type="submit" class="enviar"><span>Guardar Proceso</span></button>
+                    </center>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</section>
+</main>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <script src="/static/js/proceso_1.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+<!-- Scripts -->
+<script>
+    $(document).ready(function() {
+        $('#estudiantesTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,  // Responsivo para móviles
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros por página",
+                "zeroRecords": "No se encontraron registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrado de _MAX_ registros en total)",
+                "search": "Buscar:",
+                "paginate": {
+                    "previous": "Anterior",
+                    "next": "Siguiente"
+                }
+            }
+        });
+    });
+    // Modal
+    var modal = document.getElementById("myModal");
+    var btn = document.getElementById("btnAbrirModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    // Abrir el modal
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    // Cerrar el modal
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Cerrar el modal si se hace clic fuera del modal
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Buscando estudiante por número de documento
+    document.getElementById('numeroTI').addEventListener('input', function() {
+        var numeroTI = this.value;
+
+        if (numeroTI.length >= 2) {  // Ajusta el mínimo de caracteres que quieras
+            fetch(`/buscar_estudiante_generar3?numero_documento=${numeroTI}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        document.getElementById('nombresEstudiante').value = data.nombres_estudiante || 'No encontrado';
+                        document.getElementById('apellidosEstudiante').value = data.apellidos_estudiante || 'No encontrado';
+                        document.getElementById('grado').value = data.grado || 'No encontrado';
+                        document.getElementById('seccion').value = data.seccion || 'No encontrado';
+                        document.getElementById('jornada').value = data.jornada || 'No encontrado';
+                        document.getElementById('idacu').value = data.idacu || 'No encontrado';
+                        document.getElementById('nom_acu').value = data.nom_acu || 'No encontrado';
+                        document.getElementById('ape_acu').value = data.ape_acu || 'No encontrado';
+                        document.getElementById('tel_acu').value = data.tel_acu || 'No encontrado';
+                        document.getElementById('cor_acu').value = data.cor_acu || 'No encontrado';
+                    } else {
+                        document.getElementById('nombresEstudiante').value = 'No encontrado';
+                        document.getElementById('apellidosEstudiante').value = 'No encontrado';
+                        document.getElementById('grado').value = 'No encontrado';
+                        document.getElementById('seccion').value = 'No encontrado';
+                    }
+                });
+        }
+        
+    });
+
+    document.getElementById('generar-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        ['item1', 'item2', 'item3'].forEach(function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+    document.getElementById('exportarExcel').addEventListener('click', function () {
+    const tabla = document.getElementById('estudiantesTable');
+
+    if (!tabla) {
+        alert("No se encontró la tabla para exportar.");
+        return;
+    }
+
+    const wb = XLSX.utils.table_to_book(tabla, { sheet: "Estudiantes" });
+    XLSX.writeFile(wb, 'Estudiantes.xlsx');
+});
+</script>
+<script src="/static/js/proceso_3.js"></script>
+</body>
+</html>

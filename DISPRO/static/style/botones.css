@@ -1,0 +1,410 @@
+.crear-usuario {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.8rem 1rem; /* reducido */
+    margin: 0;
+    font-family: inherit;
+    font-size: 15px; /* reducido */
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 700;
+    border-radius: 28px; /* menos redondeado */
+    overflow: hidden;
+    background: #1ab394;
+    color: ghostwhite;
+}
+
+.crear-usuario span {
+    position: relative;
+    z-index: 1;
+    transition: color 0.4s;
+}
+
+.crear-usuario:hover span {
+    color: rgb(255, 255, 255);
+}
+
+.crear-usuario::before,
+.crear-usuario::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.crear-usuario::before {
+    content: "";
+    background: #315554;
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.crear-usuario:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+
+.user-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.img-user {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* boton de actualizacion  */
+.editar-usuario {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.3rem 0.8rem; /* tamaño más pequeño */
+    margin: 0;
+    font-family: inherit;
+    font-size: 13px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 600;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #1ab394;
+    color: #315554;
+}
+
+.editar-usuario span {
+    position: relative;
+    z-index: 0;
+    transition: color 0.4s;
+}
+
+.editar-usuario:hover span {
+    color: #ffffff;
+}
+
+.editar-usuario::before,
+.editar-usuario::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.editar-usuario::before {
+    content: "";
+    background: #eeff00;
+ 
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.editar-usuario:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+/* boton de eliminar*/
+.eliminar-usuario {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    margin: 0;
+    font-family: inherit;
+    font-size: 13px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 600;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #e74c3c; /* rojo */
+    color: ghostwhite;
+}
+
+.eliminar-usuario span {
+    position: relative;
+    z-index: 0;
+    transition: color 0.4s;
+}
+
+.eliminar-usuario:hover span {
+    color: #ffffff;
+}
+
+.eliminar-usuario::before,
+.eliminar-usuario::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.eliminar-usuario::before {
+    content: "";
+    background: #992d22;
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.eliminar-usuario:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+ 
+
+/*boton para enviar formualrio  */
+.enviar {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.6rem 1.4rem; /* más grande que editar/eliminar */
+    margin: 0;
+    font-family: inherit;
+    font-size: 15px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 600;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #007bff; /* azul */
+    color: ghostwhite;
+}
+
+.enviar span {
+    position: relative;
+    z-index: 10;
+    transition: color 0.4s;
+}
+
+.enviar:hover span {
+    color: #ffffff;
+}
+
+.enviar::before,
+.enviar::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.enviar::before {
+    content: "";
+    background: #0056b3; /* azul más oscuro al hacer hover */
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.enviar:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+
+
+.excel {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.8rem 1rem;
+    margin: 0;
+    font-family: inherit;
+    font-size: 15px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 700;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #28a745; /* Verde principal */
+    color: ghostwhite;
+}
+
+.excel span {
+    position: relative;
+    z-index: 0;
+    transition: color 0.4s;
+}
+
+.excel:hover span {
+    color: #ffffff;
+}
+
+.excel::before,
+.excel::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.excel::before {
+    content: "";
+    background: #218838; /* Verde más oscuro al hacer hover */
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.excel:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+
+
+
+/*boton para registra observacion  */
+.observacion {
+     outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    margin: 0;
+    font-family: inherit;
+    font-size: 13px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 600;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #eeaaee; /* rojo */
+    color: ghostwhite;
+}
+
+.observacion span {
+    position: relative;
+    z-index: 10;
+    transition: color 0.4s;
+}
+
+.observacion:hover span {
+    color: #ffffff;
+}
+
+.observacion::before,
+.observacion::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.observacion::before {
+    content: "";
+    background: #67e1e6; /* azul más oscuro al hacer hover */
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.observacion:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+
+
+
+/* boton de ver */
+.ver {
+    outline: none;
+    cursor: pointer;
+    border: none;
+    padding: 0.3rem 0.8rem;
+    margin: 0;
+    font-family: inherit;
+    font-size: 13px;
+    position: relative;
+    display: inline-block;
+    letter-spacing: 0.03rem;
+    font-weight: 600;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #bdc3c7; /* gris claro */
+    color: ghostwhite;
+}
+
+.ver span {
+    position: relative;
+    z-index: 10;
+    transition: color 0.4s;
+}
+
+.ver:hover span {
+    color: #ffffff;
+}
+
+.ver::before,
+.ver::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.ver::before {
+    content: "";
+    background: #7f8c8d; /* gris más oscuro */
+    width: 120%;
+    left: -10%;
+    transform: skew(30deg);
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.ver:hover::before {
+    transform: translate3d(100%, 0, 0);
+}
+
+
+.btn-pdf, .btn-pdf2, .btn-pdf3 {
+  background-color: #e74c3c; /* rojo brillante */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+  user-select: none;
+}
+
+.btn-pdf:hover, .btn-pdf2:hover, .btn-pdf3:hover {
+  background-color: #c0392b; /* rojo más oscuro para hover */
+}

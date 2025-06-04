@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+    <link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+    <link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+<!-- JS de jQuery y DataTables -->
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+               &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                     <li><a href="{{ url_for('module') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="{{ url_for('module2') }}"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li><a href="{{ url_for('module3') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+                    <li><a href="{{ url_for('ver_observaciones2') }}"><i class="fas fa-eye"></i> Observaciones</a></li>
+                      <li><a href="{{ url_for('historico') }}"><i class="fas fa-history"></i> Histórico</a></li>
+                    
+                 
+                </ul>
+            </nav>
+            <br><br>
+
+            <!-- Nombre del usuario en la parte superior -->
+            <div class="user-name">
+        
+            </div>
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                    <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="greeting">
+                    <h1>Proceso de Registro</h1>
+                </div>
+                <div class="user-info">
+                    <img src="/static/img/inem.png" alt="Logo" class="img-user">
+                
+                    {% if session['rol'] %}
+                        <div class="user-details">
+                            <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                            <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                            <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                
+            </header>
+
+            <!-- Contenido de las diferentes secciones -->
+            <section id="inicio" class="section-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                    <script>
+                        
+                            alert("{{ message }}");
+                      
+                    </script>
+                      {% endfor %}
+                {% endif %}
+            {% endwith %}
+                <div>
+                   <!-- Botón para abrir el modal de agregar -->
+                <button type="button" class="crear-usuario" onclick="openModal()"><span>Crear Usuario</span></button>
+                  <button class="excel" id="exportarEstudiantes"><span>Exportar Excel</span></button>
+                </div>
+                 
+                <!-- Tabla para mostrar los usuarios -->
+                <h2 class="mt-4">Usuarios Registrados</h2>
+             <div class="table-responsive" style="overflow-y: auto;overflow-x: auto;border: 1px solid #dee2e6;width: 100%;height: 101%;margin-left: -8px;margin-top: 4%;">
+                <table class="table table-bordered table-striped mt-3" id="userTable">
+                    <thead>
+                        
+                        <tr>
+                            <th>Tipo Identidad</th>
+                            <th>Identificación</th>
+                            <th>Rol</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Contraseña</th>
+                            <th>Teléfono</th>
+                            <th>Correo Electrónico</th>
+                            <th>Acciones</th>
+                        </tr>   
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.tipocedula }}</td>
+                            <td>{{ usuario.Nocedula }}</td>
+                            <td>{{ usuario.Rol }}</td>
+                            <td>{{ usuario.NombresCompletos }}</td>
+                            <td>{{ usuario.ApellidosUsuario }}</td>
+                            <td>{{ usuario.Contrasena }}</td>
+                            <td>{{ usuario.NumeroTelefono }}</td>
+                            <td>{{ usuario.CorreoElectronico }}</td>
+                            <td>
+                                <!-- Botón para abrir el modal de edición -->
+                              <!-- Botón para abrir el modal de edición con la ID del usuario -->
+    <button class="editar-usuario" data-bs-toggle="modal" data-bs-target="#modalEditar{{ usuario.ID }}" type="button"><span>Editar</span></button>
+                                <form action="{{ url_for('eliminar_usuario', id=usuario.ID) }}" method="POST" style="display:inline;">
+                                    <button class="eliminar-usuario" onclick="return confirm('¿Estás seguro de eliminar este usuario?')"><span>Eliminar</span></button>
+                                </form>
+                            </td>
+                            
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6">No hay usuarios registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+                
+                <!-- Paginación (gestionada por DataTables) -->
+                <div id="pagination" class="mt-3"></div>
+                
+               
+                
+                <!-- Modal para agregar usuario -->
+                <div id="agregarModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 style="color: blue;">Agregar nuevo Usuario</h5>
+                            <span class="close" onclick="closeModal()">&times;</span>
+                          
+                        </div>
+                        <div class="modal-body">
+
+
+                            <form action="/insertar_usuario" method="POST" enctype="multipart/form-data">
+                                <label for="modalRol">Rol:</label>
+                              
+                                <select name="rol" id="rol" onchange="mostrarFirma()">
+                                    <option value="">Seleccione:</option>
+                                    <option value="Docente">Docente</option>
+                                    <option value="Acudiente">Acudiente</option>
+                                    <option value="Coordinador">Coordinador</option>
+                                
+                                </select>  <br><br>
+
+                                <label for="tipocedula">Tipo de Documento:</label>
+                                <select name="tipocedula" id="tipocedula" required>
+                                    <option value="">Seleccione:</option>
+                                    <option value="cedula">Cedula</option>
+                                    <option value="Pasaporte">Pasaporte</option>
+                                    <option value="Cedula extranjera">Cedula extranjera</option>
+                                
+                                </select>  <br><br>
+
+
+
+                                <label for="cedulacudiente">No Cedula:</label>
+                                <input type="number" id="cedulacudiente" name="cedulacudiente" required><br><br>
+                
+                                <label for="modalNombres">Nombres Completos:</label>
+                                <input type="text" id="modalNombres" name="nombres" required><br><br>
+                
+                                <label for="modalApellidos">Apellidos:</label>
+                                <input type="text" id="modalApellidos" name="apellidos" required><br><br>
+
+                                <label for="usuario"> Usuario:</label>
+                                <input type="text" name="usuario" id="usuario"><br><br>
+
+                                <label for="modalContrasena">Contraseña:</label>
+                                <input type="password" id="modalContrasena" name="contrasena" required><br><br>
+                
+                                <label for="modalTelefono">Número de Teléfono:</label>
+                                <input type="text" id="modalTelefono" name="telefono" required><br><br>
+                
+                                <label for="modalCorreo">Correo Electrónico:</label>
+                                <input type="email" id="modalCorreo" name="correo" required><br><br>
+                                
+                        
+                                <center>
+                                <button type="submit" class="enviar"><span>Registrar</span></button>
+                            </center>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+<!-- Modal de edición -->
+{% for usuario in usuarios %}
+<div class="modal fade" id="modalEditar{{ usuario.ID }}" tabindex="-1" aria-labelledby="modalEditarLabel{{ usuario.ID }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarLabel{{ usuario.ID }}" style="color: blue;">Editar Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"> <span class="close" onclick="closeModal()">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario para editar el usuario -->
+           
+<form action="{{ url_for('editar_usuario', id=usuario.ID) }}" method="POST">
+
+    <!-- Campo oculto: Cédula para backend -->
+    <input type="hidden" name="cedula" value="{{ usuario.Nocedula }}">
+
+    <!-- Campo solo lectura visible (sin name para no duplicar) -->
+    <div class="mb-3">
+        <label for="cedula_visible{{ usuario.ID }}" class="form-label">Cédula</label>
+        <input type="text" class="form-control" id="cedula_visible{{ usuario.ID }}" value="{{ usuario.Nocedula }}" readonly>
+    </div>
+
+    <div class="mb-3">
+        <label for="nombres{{ usuario.ID }}" class="form-label">Nombres Completos</label>
+        <input type="text" class="form-control" id="nombres{{ usuario.ID }}" name="nombres" value="{{ usuario.NombresCompletos }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="apellidos{{ usuario.ID }}" class="form-label">Apellidos</label>
+        <input type="text" class="form-control" id="apellidos{{ usuario.ID }}" name="apellidos" value="{{ usuario.ApellidosUsuario }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="telefono{{ usuario.ID }}" class="form-label">Número de Teléfono</label>
+        <input type="text" class="form-control" id="telefono{{ usuario.ID }}" name="telefono" value="{{ usuario.NumeroTelefono }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="correo{{ usuario.ID }}" class="form-label">Correo Electrónico</label>
+        <input type="email" class="form-control" id="correo{{ usuario.ID }}" name="correo" value="{{ usuario.CorreoElectronico }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="usuario{{ usuario.ID }}" class="form-label">Nombre de Usuario</label>
+        <input type="text" class="form-control" id="usuario{{ usuario.ID }}" name="usuario" value="{{ usuario.Usuario }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="contrasena{{ usuario.ID }}" class="form-label">Nueva Contraseña</label>
+        <input type="password" class="form-control" id="contrasena{{ usuario.ID }}" name="contrasena" required>
+    </div>
+
+    <center>
+        <button type="submit" class="enviar"><span>Actualizar</span></button>
+    </center>
+</form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+    
+                
+                <script>
+                    // Inicializa DataTables
+                    $(document).ready(function() {
+                        $('#userTable').DataTable({
+                            "paging": true, // Habilitar paginación
+                            "searching": true, // Habilitar búsqueda
+                            "info": true, // Mostrar información de la tabla
+                            "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                            "language": {
+                                "search": "Buscar:",
+                                "paginate": {
+                                    "next": "Siguiente",
+                                    "previous": "Anterior"
+                                },
+                                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                                "infoEmpty": "No hay registros disponibles",
+                                "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                            }
+                        });
+                    });
+                
+                    // Función para abrir el modal
+                    function openModal() {
+                        document.getElementById('agregarModal').style.display = 'block';
+                    }
+                
+                    // Función para cerrar el modal
+                    function closeModal() {
+                        document.getElementById('agregarModal').style.display = 'none';
+                    }
+
+//funcion para habilitar las frimas 
+                    function mostrarFirma() {
+                        const rol = document.getElementById('rol').value;
+                        const firmaContainer = document.getElementById('firma-container');
+                    
+                        if (rol === 'Docente' || rol === 'Coordinador') {
+                            firmaContainer.style.display = 'block';
+                            document.getElementById('firma').required = true;
+                        } else {
+                            firmaContainer.style.display = 'none';
+                            document.getElementById('firma').required = false;
+                        }
+                    }
+                </script>
+                
+            </section>
+
+            <section id="estadisticas" class="section-content" style="display: none;">
+                <h2>Estadísticas</h2>
+                <p>Aquí están las estadísticas detalladas del sistema.</p>
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+           
+        </main>
+    </div>
+
+    <script>
+        // Función para mostrar la sección correspondiente y ocultar las demás
+function showSection(section) {
+    // Ocultar todas las secciones
+    const sections = document.querySelectorAll('.section-content');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Mostrar la sección seleccionada
+    const selectedSection = document.getElementById(section);
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+    }
+}
+$(document).ready(function() {
+    // Verificar si la tabla ya tiene DataTable inicializado
+    if (!$.fn.dataTable.isDataTable('#userTable')) {
+        $('#userTable').DataTable({
+            "paging": true, // Habilitar paginación
+            "searching": true, // Habilitar búsqueda
+            "info": true, // Mostrar información de la tabla
+            "responsive": true,
+            "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+            "language": {
+                "search": "Buscar:",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrado de _MAX_ registros en total)"
+            }
+        });
+    }
+});
+
+document.getElementById("exportarEstudiantes").addEventListener("click", function () {
+        // Selecciona la tabla por ID
+        var tabla = document.getElementById("userTable");
+
+        // Convierte la tabla en una hoja de cálculo
+        var wb = XLSX.utils.table_to_book(tabla, { sheet: "Estudiantes" });
+
+        // Exporta a un archivo .xlsx
+        XLSX.writeFile(wb, "usuarios.xlsx");
+    });
+
+
+    </script>
+    <!-- JavaScript para abrir y cerrar el modal -->
+
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+ </body>
+</body>
+</html>

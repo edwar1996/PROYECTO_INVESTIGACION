@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+<!-- JS de jQuery y DataTables -->
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+<link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<style>
+
+.extra-item {
+    display: none;
+    background-color: #1ab394;
+    border-radius: 15px;
+    font-size: 16px;
+    color: #ffff;
+    margin-left: 20px;
+    transition: all 0.3s ease-in-out;
+    height: 43px;
+}
+
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+                    &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                         <li><a href="{{ url_for('docente.docente') }}"><i class="fas fa-home"></i> Estudiantes</a></li>
+                    <li><a href="#" id="generar-link"><i class="fas fa-users"></i> Generar</a></li>
+                    <li class="extra-item" id="item1"><a href="{{ url_for('docente.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>  &nbsp;&nbsp;Situación 1</a></li>
+                    <li class="extra-item" id="item2"><a href="{{ url_for('generar2.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 2</a></li>
+                    <li class="extra-item" id="item3"><a href="{{ url_for('generar3.generarf') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 3</a></li>
+
+                    <li><a href="{{ url_for('estado_estudiantil.mostrar_casos') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+ 
+                <li><a href="{{ url_for('docente.ver_observaciones') }}" onclick="showSection('estadisticas')"><i class="fa-brands fa-slack"></i> Observaciones</a></li>
+                                   <li>
+    <a href="{{ url_for('estado_estudiantil.mostrar_historico') }}">
+        <i class="fas fa-archive"></i> Historial
+    </a>
+</li>
+                </ul>
+            </nav>
+<br><br>
+            <!-- Nombre del usuario en la parte superior -->
+            <div class="user-name">
+
+            </div>
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                     <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="greeting">
+                     <h2>Listado de Estudiantes con Proceso cerrado</h2>
+                    
+                
+                </div>
+
+                       <div class="user-info">
+                    <img src="/static/img/inem.png" alt="" srcset="" class="img-user">
+                    
+                    {% if session['rol'] %}
+                    <div class="user-details">
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    {% endif %}
+                    </div>
+                </div>
+                        <!-- Ícono de Notificación -->
+
+
+                </header>
+
+                <section id="inicio" class="section-content">
+
+
+
+                    </div>
+                    
+                </div>
+                <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br> <br><br>
+                <!-- Paginación (gestionada por DataTables) -->
+                <div id="pagination" class="mt-3"></div>
+                
+                <div style="
+                margin-left: 280px;
+                width: 79%;
+                margin-top: -53%;
+            ">
+        
+
+                <table id="userTable2" class="table table-bordered table-striped mt-3 dataTable no-footer">
+                    <thead>
+                        <tr>
+                            <th>Identificación</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Grado</th>
+                            <th>Sección</th>
+                            <th>Jornada</th>
+                            <th>Nombre Acudiente</th>
+                            <th>Apellido Acudiente</th>
+                            <th>Correo Acudiente</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Falta Cometida</th>
+                            <th>Proceso</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for est in cerrados %}
+                        <tr>
+                            <td>{{ est[0] }}</td>
+                            <td>{{ est[1] }}</td>
+                            <td>{{ est[2] }}</td>
+                            <td>{{ est[3] }}</td>
+                            <td>{{ est[4] }}</td>
+                            <td>{{ est[5] }}</td>
+                    
+                            <td>{{ est[7] }}</td>
+                            <td>{{ est[8] }}</td>
+                            <td>{{ est[9] }}</td>
+                            <td>{{ est[10] }}</td>
+                            <td>{{ est[11] }}</td>
+                            <td>{{ est[12] }}</td>
+                            <td>{{ est[13] }}</td>
+                         
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+       
+        </main>
+    </div>
+    <!-- JavaScript para abrir y cerrar el modal -->
+<script>
+    $(document).ready(function() {
+        // Verificar si la tabla ya tiene DataTable inicializado
+        if (!$.fn.dataTable.isDataTable('#userTable2')) {
+            $('#userTable2').DataTable({
+                "scrollX": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "info": true, // Mostrar información de la tabla
+                "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                }
+            });
+        }
+    });
+
+
+
+
+
+    $(document).ready(function() {
+        // Verificar si la tabla ya tiene DataTable inicializado
+        if (!$.fn.dataTable.isDataTable('#userTable')) {
+            $('#userTable').DataTable({
+                "scrollX": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "info": true, // Mostrar información de la tabla
+                "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                }
+            });
+        }
+    });
+        document.getElementById('generar-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        ['item1', 'item2', 'item3'].forEach(function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+    
+      
+
+
+
+</script>
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+ </body>
+</body>
+</html>

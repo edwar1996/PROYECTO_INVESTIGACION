@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Productos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Librería para Animaciones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <!-- Estilos Personalizados -->
+
+    <style>
+        /* styles.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+h2, h3, h4 {
+    color: #333;
+}
+
+.btn {
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <h2 class="text-center">Registro de Productos</h2>
+
+        <!-- Formulario de Registro de Producto -->
+        <form id="formularioProducto" class="mb-3">
+            <div class="mb-3">
+                <label for="producto" class="form-label">Producto</label>
+                <select id="producto" class="form-select" required>
+                    <option value="Dulce de Chile">Dulce de Chile</option>
+                    <option value="Dulce de Ajo">Dulce de Ajo</option>
+                    <option value="Dulce de Papa">Dulce de Papa</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio</label>
+                <input type="number" id="precio" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="moneda" class="form-label">Moneda</label>
+                <select id="moneda" class="form-select" required>
+                    <option value="Dólares">Dólares</option>
+                    <option value="Pesos">Pesos</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Registrar Producto</button>
+        </form>
+
+        <!-- Tabla de Productos Registrados -->
+        <h3>Productos Registrados</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Moneda</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos"></tbody>
+        </table>
+
+        <!-- Suma de Precios -->
+        <h4>Total en Pesos: <span id="totalPesos">0</span></h4>
+        <h4>Total en Dólares: <span id="totalDolares">0</span></h4>
+
+        <!-- Botón para Generar Excel -->
+        <button id="btnGenerarExcel" class="btn btn-success w-100">Generar Excel</button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Librería para Excel (SheetJS) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+    <!-- Script Personalizado -->
+    <script>
+        // script.js
+
+// Array para almacenar los productos registrados
+let productos = JSON.parse(localStorage.getItem("productos")) || [];
+
+// Mostrar los productos registrados
+function mostrarProductos() {
+    const tablaProductos = document.getElementById('tablaProductos');
+    tablaProductos.innerHTML = '';
+    let totalPesos = 0;
+    let totalDolares = 0;
+
+    productos.forEach((producto, index) => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${producto.nombre}</td>
+            <td>${producto.precio}</td>
+            <td>${producto.moneda}</td>
+            <td>
+                <button class="btn btn-warning btn-sm" onclick="editarProducto(${index})">Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${index})">Eliminar</button>
+            </td>
+        `;
+        tablaProductos.appendChild(fila);
+
+        // Sumar los totales por moneda
+        if (producto.moneda === "Pesos") {
+            totalPesos += parseFloat(producto.precio);
+        } else {
+            totalDolares += parseFloat(producto.precio);
+        }
+    });
+
+    // Mostrar los totales
+    document.getElementById('totalPesos').textContent = totalPesos.toFixed(2);
+    document.getElementById('totalDolares').textContent = totalDolares.toFixed(2);
+}
+
+// Registrar producto
+document.getElementById('formularioProducto').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const nombre = document.getElementById('producto').value;
+    const precio = document.getElementById('precio').value;
+    const moneda = document.getElementById('moneda').value;
+
+    const nuevoProducto = { nombre, precio, moneda };
+    productos.push(nuevoProducto);
+
+    // Guardar en localStorage
+    localStorage.setItem('productos', JSON.stringify(productos));
+
+    // Limpiar formulario y actualizar la tabla
+    this.reset();
+    mostrarProductos();
+});
+
+// Editar producto
+function editarProducto(index) {
+    const producto = productos[index];
+
+    document.getElementById('producto').value = producto.nombre;
+    document.getElementById('precio').value = producto.precio;
+    document.getElementById('moneda').value = producto.moneda;
+
+    eliminarProducto(index);
+}
+
+// Eliminar producto
+function eliminarProducto(index) {
+    productos.splice(index, 1);
+    localStorage.setItem('productos', JSON.stringify(productos));
+    mostrarProductos();
+}
+
+// Generar Excel
+document.getElementById('btnGenerarExcel').addEventListener('click', function() {
+    // Filtrar productos por moneda
+    const productosPesos = productos.filter(p => p.moneda === "Pesos");
+    const productosDolares = productos.filter(p => p.moneda === "Dólares");
+
+    // Convertir los productos a hojas de Excel
+    const wsPesos = XLSX.utils.json_to_sheet(productosPesos);
+    const wsDolares = XLSX.utils.json_to_sheet(productosDolares);
+
+    // Crear el libro de Excel y agregar las hojas
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, wsPesos, "Pesos");
+    XLSX.utils.book_append_sheet(wb, wsDolares, "Dólares");
+
+    // Guardar el archivo
+    XLSX.writeFile(wb, 'productos.xlsx');
+});
+
+// Mostrar productos al cargar la página
+mostrarProductos();
+
+    </script>
+</body>
+</html>

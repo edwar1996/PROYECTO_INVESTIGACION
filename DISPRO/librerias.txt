@@ -1,0 +1,60 @@
+
+pip install flask    --- eel control
+pip install flask-wtf    -- para trabajar
+pip install flask-sqlalchemy --- para bases de datos 
+ pip install flask werkzeug --- para el correo electronico
+
+  
+     import tkinter as tk
+from tkinter import filedialog
+import os
+
+# Función para renombrar los archivos
+def renombrar_archivos():
+    # Número a insertar después del guion bajo
+    numero = "814568"
+    
+    # Obtener la lista de archivos seleccionados
+    archivos = filedialog.askopenfilenames(title="Selecciona archivos", filetypes=(("Todos los archivos", "*.*"),))
+
+    if not archivos:
+        return
+
+    # Iterar sobre cada archivo seleccionado
+    for archivo in archivos:
+        # Obtener el nombre y la extensión del archivo
+        ruta, nombre_archivo = os.path.split(archivo)
+        nombre, extension = os.path.splitext(nombre_archivo)
+
+        # Verificar si el nombre tiene al menos un guion bajo para insertar el número
+        if "_" in nombre:
+            # Encontrar la posición del primer guion bajo
+            pos_guion_bajo = nombre.find('_')
+            
+            # Crear el nuevo nombre insertando el número después del primer guion bajo
+            nuevo_nombre = f"{nombre[:pos_guion_bajo + 1]}{numero}_{nombre[pos_guion_bajo + 1:]}{extension}"
+
+            # Crear la ruta del nuevo archivo
+            nueva_ruta = os.path.join(ruta, nuevo_nombre)
+
+            # Renombrar el archivo
+            os.rename(archivo, nueva_ruta)
+            print(f"Renombrado: {archivo} -> {nueva_ruta}")
+        else:
+            print(f"El archivo {nombre_archivo} no contiene un guion bajo para modificar.")
+
+# Crear la interfaz gráfica
+def crear_ventana():
+    ventana = tk.Tk()
+    ventana.title("Renombrar Archivos")
+    
+    # Crear un botón para abrir el diálogo de archivos y renombrar
+    boton_abrir = tk.Button(ventana, text="Seleccionar Archivos", command=renombrar_archivos)
+    boton_abrir.pack(pady=20)
+    
+    # Iniciar la interfaz gráfica
+    ventana.mainloop()
+
+# Llamar a la función para crear la ventana
+if __name__ == "__main__":
+    crear_ventana()

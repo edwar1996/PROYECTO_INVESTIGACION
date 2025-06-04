@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- Incluir los estilos de DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+    <link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<!-- JS de jQuery y DataTables -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<style>
+   
+        /* Estilo para el Modal */
+    .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed; /* Fijo en la pantalla */
+        z-index: 1; /* Asegura que esté encima de otros elementos */
+        left: 0;
+        top: 0;
+        width: 100%; /* Pantalla completa */
+        height: 100%;
+        overflow: auto; /* Permite desplazarse si el contenido es grande */
+        background-color: rgba(0, 0, 0, 0.4); /* Fondo translúcido */
+    }
+
+    /* Modal Content */
+
+    .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+    }
+
+    /* El botón de cerrar */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .extra-item {
+        display: none;
+        background-color: #1ab394;
+        border-radius: 15px;
+        font-size: 16px;
+        color: #ffff;
+        margin-left: 20px;
+        transition: all 0.3s ease-in-out;
+        height: 43px;
+    }
+   
+</style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+                    &nbsp;      D I S P R O </h2>   
+            </div>
+            <nav class="nav">
+                <ul>
+                   <li><a href="{{ url_for('docente.docente') }}"><i class="fas fa-home"></i> Estudiantes</a></li>
+                    <li><a href="#" id="generar-link"><i class="fas fa-users"></i> Generar</a></li>
+                    <li class="extra-item" id="item1"><a href="{{ url_for('docente.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>  &nbsp;&nbsp;Situación 1</a></li>
+                    <li class="extra-item" id="item2"><a href="{{ url_for('generar2.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 2</a></li>
+                    <li class="extra-item" id="item3"><a href="{{ url_for('generar3.generarf') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 3</a></li>
+
+                    <li><a href="{{ url_for('estado_estudiantil.mostrar_casos') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+ 
+                <li><a href="{{ url_for('docente.ver_observaciones') }}" onclick="showSection('estadisticas')"><i class="fa-brands fa-slack"></i> Observaciones</a></li>
+                                   <li>
+    <a href="{{ url_for('estado_estudiantil.mostrar_historico') }}">
+        <i class="fas fa-archive"></i> Historial
+    </a>
+</li>
+                </ul>
+            </nav>
+
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                    <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+                    <!-- Aquí comienza el área para los mensajes flash -->
+                    <div id="flash-messages">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <ul>
+                                    {% for category, message in messages %}
+                                    <script>
+                        
+                                        alert("{{ message }}");
+                                  
+                                </script>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+            <header class="header">
+                <div class="greeting">
+                    <h1>Bienvenido, Docente</h1>
+                </div>
+                
+                <div class="user-info">
+                    <img src="/static/img/inem.png" alt="Logo" class="img-user">
+                    
+                    {% if session['rol'] %}
+                    <div class="user-details">
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <input type="hidden" name="profesor1"  id="profesor1" value="{{ session['nombres'] }} {{ session['apellidos'] }}">
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    </div>
+                        {% endif %}
+                </div>
+            </header>
+
+            <!-- Contenido de las diferentes secciones -->
+            <section id="inicio" class="section-content">
+               
+              <!-- Botón para abrir el Modal -->
+    <button id="openModalBtn" class="crear-usuario"><span>
+        Registro Estudiante
+    </span></button>
+
+    <!-- El Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form action="{{ url_for('docente.docente') }}" method="POST">
+                <!-- Información del estudiante -->
+                <fieldset>
+                    <legend>Datos del Estudiante</legend>
+
+                    <label for="tipo_documento">Tipo de Documento:</label>
+                    <select id="tipo_documento" name="tipo_documento" required>
+                        <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                        <option value="Cedula">Cédula</option>
+                        <option value="DIE">DIE (Documento de identificacion extranjero)</option>
+                       
+                    </select><br><br>
+
+                    <label for="numero_documento">Número de Documento:</label>
+                    <input type="text" id="numero_documento" name="numero_documento" required><br><br>
+
+                    <label for="nombres_estudiante">Nombres del Estudiante:</label>
+                    <input type="text" id="nombres_estudiante" name="nombres_estudiante" required><br><br>
+
+                    <label for="apellidos_estudiante">Apellidos del Estudiante:</label>
+                    <input type="text" id="apellidos_estudiante" name="apellidos_estudiante" required><br><br>
+
+                    <label for="grado">Grado:</label>
+                
+                    <select name="grado" id="grado">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                    </select><br><br>
+
+                    <label for="seccion">Sección:</label>
+                    <input type="text" id="seccion" name="seccion" required><br><br>
+
+                    <label for="jornada">Jornada:</label>
+                    <select name="jornada" id="jornada" required><br><br>
+                        <option value="">Seleccione : </option>
+                        <option value="Mañana">Mañana</option>
+                        <option value="Tarde">Tarde</option>
+                        
+                    </select>
+                </fieldset>
+
+                <!-- Información del acudiente -->
+                <fieldset>
+                    <legend>Datos del Acudiente</legend>
+                    <label for="id_acudiente">ID Acudiente:</label>
+                    <input type="text" id="id_acudiente" name="id_acudiente" required><br><br>
+
+                    <label for="nombre_acudiente">Nombre del Acudiente:</label>
+                    <input type="text" id="nombre_acudiente" name="nombre_acudiente" required><br><br>
+
+                    <label for="apellido_acudiente">Apellido del Acudiente:</label>
+                    <input type="text" id="apellido_acudiente" name="apellido_acudiente" required><br><br>
+
+                    <label for="telefono">Teléfono del Acudiente:</label>
+                    <input type="text" id="telefono" name="telefono" required><br><br>
+
+                    <label for="correo">Correo Electrónico del Acudiente:</label>
+                    <input type="email" id="correo" name="correo" required><br><br>
+
+                    <label for="profesor">Profesor Correspondiente:</label>
+                    <input type="text" name="profesor" id="profesor" value="{{ session['nombres'] }} {{ session['apellidos'] }}" readonly>
+
+                </fieldset>
+            <center>
+                <button type="submit" class="enviar"><span>Registrar</span></button>
+            </center>
+            </form> 
+        </div>     
+    </div>
+
+
+ <!-- Modal para Editar Estudiante (solo uno) -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <form action="{{ url_for('docente.docente') }}" method="POST" id="editForm">
+            <input type="hidden" name="action" value="edit">
+              <!-- Campo oculto con el tipo de documento original -->
+              <input type="hidden" id="edit_tipo_documento_original" name="tipo_documento_original">
+            <fieldset>
+                <legend>Datos del Estudiante</legend>
+                <label for="edit_tipo_documento">Tipo de Documento:</label>
+                <select id="edit_tipo_documento" name="tipo_documento" required>
+                    <option value="Cedula">Cédula</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                    <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                </select><br><br>
+
+                <label for="edit_numero_documento">Número de Documento:</label>
+                <input type="text" id="edit_numero_documento" name="numero_documento" readonly required><br><br>
+
+                <label for="edit_nombres_estudiante">Nombres del Estudiante:</label>
+                <input type="text" id="edit_nombres_estudiante" name="nombres_estudiante" required><br><br>
+
+                <label for="edit_apellidos_estudiante">Apellidos del Estudiante:</label>
+                <input type="text" id="edit_apellidos_estudiante" name="apellidos_estudiante" required><br><br>
+
+                <label for="edit_grado">Grado:</label>
+                <input type="text" id="edit_grado" name="grado" required><br><br>
+
+                <label for="edit_seccion">Sección:</label>
+                <input type="text" id="edit_seccion" name="seccion" required><br><br>
+
+                <label for="edit_jornada">Jornada:</label>
+                <input type="text" id="edit_jornada" name="jornada" required><br><br>
+            </fieldset>
+
+            <fieldset>
+                <legend>Datos del Acudiente</legend>
+                <label for="edit_id_acudiente">ID Acudiente:</label>
+                <input type="text" id="edit_id_acudiente" name="id_acudiente" required><br><br>
+
+                <label for="edit_nombre_acudiente">Nombre del Acudiente:</label>
+                <input type="text" id="edit_nombre_acudiente" name="nombre_acudiente" readonly><br><br>
+
+                <label for="edit_apellido_acudiente">Apellido del Acudiente:</label>
+                <input type="text" id="edit_apellido_acudiente" name="apellido_acudiente" readonly><br><br>
+
+                <label for="edit_telefono">Teléfono del Acudiente:</label>
+                <input type="text" id="edit_telefono" name="telefono" readonly><br><br>
+
+                <label for="edit_correo">Correo Electrónico del Acudiente:</label>
+                <input type="email" id="edit_correo" name="correo" readonly><br><br>
+            </fieldset> <br>
+           <center>
+            <button type="submit" class="enviar"><span>Actualizar </span> </button>
+           </center>
+        </form>
+    </div>
+</div>
+
+
+
+    <h2>Estudiantes Registrados</h2>
+    {% if estudiantes %}
+    <div class="table-responsive" style="overflow-y: auto;overflow-x: auto;border: 1px solid #dee2e6;width: 100%;height: 35%; margin-top: 4%;">
+        <table id="tabla_estudiantes" class="table table-bordered align-middle" style="margin-left: 0;">
+            <thead class="table-light" style="background-color: white;">
+                <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre del Estudiante</th>
+                    <th>Apellidos del Estudiante</th>
+                    <th>Grado</th>
+                    <th>Sección</th>
+                    <th>Jornada</th>
+                    <th>Nombre del Acudiente</th>
+                    <th>Apellido del Acudiente</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Botones de Acción </th>
+             
+                </tr>
+            </thead>
+            <tbody>
+                {% for estudiante in estudiantes %}
+                    <tr>
+                        <td>{{ estudiante.TipoDocumento }}</td>
+                        <td>{{ estudiante.NumeroDocumento }}</td>
+                        <td>{{ estudiante.NombresEstudiante }}</td>
+                        <td>{{ estudiante.ApellidosEstudiante }}</td>
+                        <td>{{ estudiante.Grado }}</td>
+                        <td>{{ estudiante.Seccion }}</td>
+                        <td>{{ estudiante.Jornada }}</td>
+                        <td>{{ estudiante.NombreAcudiente }}</td>
+                        <td>{{ estudiante.ApellidoAcudiente }}</td>
+                        <td>{{ estudiante.TelefonoAcudiente }}</td>
+                        <td>{{ estudiante.CorreoAcudiente }}</td>
+                        <td>
+                            <button type="button" class="editar-usuario"
+                                data-tipo="{{ estudiante.TipoDocumento }}"
+                                data-numero="{{ estudiante.NumeroDocumento }}"
+                                data-nombres="{{ estudiante.NombresEstudiante }}"
+                                data-apellidos="{{ estudiante.ApellidosEstudiante }}"
+                                data-grado="{{ estudiante.Grado }}"
+                                data-seccion="{{ estudiante.Seccion }}"
+                                data-jornada="{{ estudiante.Jornada }}"
+                                data-idacudiente="{{ estudiante.IdAcudiente }}"
+                                data-nombreacudiente="{{ estudiante.NombreAcudiente }}"
+                                data-apellidoacudiente="{{ estudiante.ApellidoAcudiente }}"
+                                data-telefono="{{ estudiante.TelefonoAcudiente }}"
+                                data-correo="{{ estudiante.CorreoAcudiente }}" style="width: 80px;">
+                             <span>Editar</span>
+                            </button>
+
+                            <form action="{{ url_for('docente.docente') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="tipo_documento" value="{{ estudiante.TipoDocumento }}">
+                                <input type="hidden" name="numero_documento" value="{{ estudiante.NumeroDocumento }}">
+                                <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este estudiante?');" class="eliminar-usuario">
+                                    <span>Eliminar</span>
+                                </button>
+                            </form>
+
+                                <!-- Nuevo botón: Registrar Observación -->
+                            <button type="button" class="observacion"
+                                data-tipo="{{ estudiante.TipoDocumento }}"
+                                data-numero="{{ estudiante.NumeroDocumento }}"
+                                data-nombres="{{ estudiante.NombresEstudiante }}"
+                                data-apellidos="{{ estudiante.ApellidosEstudiante }}"
+                                data-grado="{{ estudiante.Grado }}"
+                                 onclick="registrarObservacion(this)">
+                               <span>Registrar</span>
+                            </button>
+                
+
+                        </td>
+                 
+                    </div>
+                </div>
+                        
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay estudiantes registrados.</p>
+    {% endif %}
+    </div>
+ <h5 style="margin-top: 20px;"><hr></h5>
+ <br><br>
+ <h1>Estadísticas por proceso</h1>
+<button class="excel" id="exportarExcel"><span>Exportar Excel</span></button>
+
+<br><br>
+<!-- Contenedor de los gráficos en fila horizontal -->
+<div style="display: flex; justify-content: space-between; gap: 20px;">
+
+    <!-- Gráfico de estudiantes por Grado -->
+    <div style="flex: 1; min-width: 200px; background: #fff; border-radius: 50px; height: 300px">
+        <h5>Estudiantes por Grado</h5>
+        <canvas id="chartGrado" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Gráfico de estudiantes por Jornada -->
+    <div style="flex: 1;min-width: 181px;height: 263px;background: #fff;border-radius: 50px;">
+        <h5>Distribución de Estudiantes por Jornada</h5>
+       
+        <canvas id="chartJornada" width="400" height="200" style="margin-left: 29%;"></canvas>
+     
+    </div>
+
+</div>
+  </div>
+</div>
+
+    <script>
+
+        //grafica 1
+    document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("tabla_estudiantes");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    // Contadores por grado
+    const conteoGrados = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+        const grado = celdas[4].innerText.trim();  // Columna Grado
+
+        if (grado in conteoGrados) {
+            conteoGrados[grado]++;
+        } else {
+            conteoGrados[grado] = 1;
+        }
+    });
+
+    // Preparar datos para Chart.js
+    const labels = Object.keys(conteoGrados);
+    const data = Object.values(conteoGrados);
+
+    // Crear gráfica
+    new Chart(document.getElementById('chartGrado'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Cantidad de Estudiantes',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+//siguiente grafica
+        document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("tabla_estudiantes");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    // Contadores por jornada
+    const conteoJornadas = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+        const jornada = celdas[6].innerText.trim();  // Columna Jornada
+
+        if (jornada in conteoJornadas) {
+            conteoJornadas[jornada]++;
+        } else {
+            conteoJornadas[jornada] = 1;
+        }
+    });
+
+    // Preparar datos para el gráfico de pastel
+    const labelsJornada = Object.keys(conteoJornadas);
+    const dataJornada = Object.values(conteoJornadas);
+
+    // Crear gráfico de pastel
+    new Chart(document.getElementById('chartJornada'), {
+        type: 'pie',
+        data: {
+            labels: labelsJornada,
+            datasets: [{
+                data: dataJornada,
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'], // Colores
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return tooltipItem.label + ': ' + tooltipItem.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+        // Obtener elementos
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("openModalBtn");
+        var span = document.getElementsByClassName("close")[0];
+
+        // Abrir el Modal cuando se presiona el botón
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Cerrar el Modal cuando se presiona la "X"
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Cerrar el Modal si el usuario hace clic fuera del Modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        document.getElementById('generar-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        ['item1', 'item2', 'item3'].forEach(function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+
+        document.querySelectorAll('.editar-usuario').forEach(button => {
+            button.addEventListener('click', function () {
+                document.getElementById('edit_tipo_documento').value = this.dataset.tipo;
+                document.getElementById('edit_tipo_documento_original').value = this.dataset.tipo; // Guardar valor original
+                document.getElementById('edit_numero_documento').value = this.dataset.numero;
+                document.getElementById('edit_nombres_estudiante').value = this.dataset.nombres;
+                document.getElementById('edit_apellidos_estudiante').value = this.dataset.apellidos;
+                document.getElementById('edit_grado').value = this.dataset.grado;
+                document.getElementById('edit_seccion').value = this.dataset.seccion;
+                document.getElementById('edit_jornada').value = this.dataset.jornada;
+        
+                document.getElementById('edit_id_acudiente').value = this.dataset.idacudiente;
+                document.getElementById('edit_nombre_acudiente').value = this.dataset.nombreacudiente;
+                document.getElementById('edit_apellido_acudiente').value = this.dataset.apellidoacudiente;
+                document.getElementById('edit_telefono').value = this.dataset.telefono;
+                document.getElementById('edit_correo').value = this.dataset.correo;
+        
+                document.getElementById('editModal').style.display = 'block';
+            });
+        });
+        
+        // Cerrar modal
+        document.querySelectorAll('.close').forEach(span => {
+            span.onclick = () => {
+                span.closest('.modal').style.display = 'none';
+            };
+        });
+        
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        };
+
+
+function registrarObservacion(button) {
+    var tipoDocumento = button.getAttribute('data-tipo');
+    var numeroDocumento = button.getAttribute('data-numero');
+    var nombreEstudiante = button.getAttribute('data-nombres');
+    var apellidoEstudiante = button.getAttribute('data-apellidos');
+    var grado = button.getAttribute('data-grado');
+
+    // Verificar si los datos necesarios están disponibles
+    if (!tipoDocumento || !numeroDocumento || !nombreEstudiante || !apellidoEstudiante || !grado) {
+        alert("Datos del estudiante incompletos.");
+        return;
+    }
+
+    // Mostrar un prompt o modal para que se ingrese la observación
+    var observacion = prompt(`Introduce la observación para ${nombreEstudiante} ${apellidoEstudiante}, del grado ${grado}:`);
+
+    if (observacion) {
+        var confirmation = confirm(`¿Deseas registrar la observación para ${nombreEstudiante} ${apellidoEstudiante}, del grado ${grado}?`);
+
+        if (confirmation) {
+            // Crear el formulario dinámicamente
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ url_for("docente.docente") }}';
+
+            // Acción para registrar la observación
+            var actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'registrar_observacion';
+            form.appendChild(actionInput);
+
+            // Campos del formulario
+            form.appendChild(createHiddenInput('tipo_documento', tipoDocumento));
+            form.appendChild(createHiddenInput('numero_documento', numeroDocumento));
+            form.appendChild(createHiddenInput('nombre_estudiante', nombreEstudiante));
+            form.appendChild(createHiddenInput('apellido_estudiante', apellidoEstudiante));
+            form.appendChild(createHiddenInput('grado', grado));
+            form.appendChild(createHiddenInput('observacion', observacion));
+            var profesor = document.getElementById('profesor1').value; // Obtener el valor del input profesor
+            console.log("el prfesor:"+profesor)
+            form.appendChild(createHiddenInput('profesor', profesor));
+            // Agregar el formulario al body y enviarlo
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+}
+
+// Función para crear un input oculto
+function createHiddenInput(name, value) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = name;
+    input.value = value;
+    return input;
+}
+
+
+
+document.getElementById('exportarExcel').addEventListener('click', function () {
+    // Obtener la tabla por ID
+    var tabla = document.getElementById('tabla_estudiantes');
+
+    // Convertir la tabla HTML a un array de datos de la tabla
+    var rows = tabla.rows;
+
+    // Crear una nueva tabla sin la última columna (columna de botones)
+    var nuevaTabla = [];
+
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i].cells;
+
+        // Crear un array por cada fila y excluir la última columna (columna de botones)
+        var rowData = [];
+        for (var j = 0; j < row.length - 1; j++) {
+            rowData.push(row[j].innerText); // Añadir solo las celdas excepto la de los botones
+        }
+        nuevaTabla.push(rowData);
+    }
+
+    // Convertir la nueva tabla sin la columna de botones a un libro de trabajo (workbook)
+    var ws = XLSX.utils.aoa_to_sheet(nuevaTabla);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Estudiantes");
+
+    // Descargar el archivo Excel
+    XLSX.writeFile(wb, 'Estudiantes.xlsx');
+});
+
+document.getElementById("id_acudiente").addEventListener("input", function() {
+    let cedula = this.value;
+    if (cedula.length < 3) return; // espera mínimo 3 caracteres
+
+    fetch(`/buscar_acudiente?cedula=${cedula}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById("nombre_acudiente").value = data.nombre;
+                document.getElementById("apellido_acudiente").value = data.apellido;
+                document.getElementById("telefono").value = data.telefono;
+                document.getElementById("correo").value = data.correo;
+            } else {
+                document.getElementById("nombre_acudiente").value = "No encontrado";
+                document.getElementById("apellido_acudiente").value = "No encontrado";
+                document.getElementById("telefono").value = "No encontrado";
+                document.getElementById("correo").value = "No encontrado";
+            }
+        });
+});
+    </script>
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+       
+        </main>
+    </div>
+    <!-- JavaScript para abrir y cerrar el modal -->
+
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+ <!-- Incluir los scripts de jQuery y DataTables -->
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+<script>
+    // Inicializar DataTables con opciones en español
+    $(document).ready(function() {
+        $('#tabla_estudiantes').DataTable({
+            "language": {
+                "sProcessing": "Procesando...",
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sZeroRecords": "No se encontraron resultados",
+                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sSearch": "Buscar:",
+                "sUrl": "",
+                "sInfoThousands": ",",
+                "sLoadingRecords": "Cargando...",
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "oAria": {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            }
+        });
+    });
+</script>
+ </body>
+</body>
+</html>

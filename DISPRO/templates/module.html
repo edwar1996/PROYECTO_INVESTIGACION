@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+        <link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+    <link rel="stylesheet" href="/static/style/table.css?v=1.0">
+     <link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+<!-- JS de jQuery y DataTables -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<style>
+    .table-responsive {
+    padding-left: 0; /* Eliminar relleno izquierdo */
+    padding-right: 0; /* Eliminar relleno derecho */
+}
+
+#estudiantesTable {
+    margin-left: 0; /* Eliminar margen izquierdo de la tabla */
+}
+
+</style>
+
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+                    &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="{{ url_for('module') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="{{ url_for('module2') }}"><i class="fas fa-users"></i> Usuarios</a></li>
+                    <li><a href="{{ url_for('module3') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+                    <li><a href="{{ url_for('ver_observaciones2') }}"><i class="fas fa-eye"></i> Observaciones</a></li>
+                      <li><a href="{{ url_for('historico') }}"><i class="fas fa-history"></i> Histórico</a></li>
+                  
+                 
+                </ul>
+            </nav>
+            <br><br>
+
+            <!-- Nombre del usuario en la parte superior -->
+            <div class="user-name">
+    
+            </div>
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                     <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="greeting">
+                    <h1>Bienvenido, Usuario</h1>
+                </div>
+        <div class="user-info">
+                    <img src="/static/img/inem.png" alt="" srcset="" class="img-user">
+                    <div class="user-details">
+                    {% if session['rol'] %}
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    {% endif %}
+                    </div>
+                </div>
+                <div id="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                    <script>
+        
+                        alert("{{ message }}");
+                  
+                </script>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+            </header>
+
+            <!-- Contenido de las diferentes secciones -->
+            <section id="inicio" class="section-content">
+                    <button id="openModalBtn" class="crear-usuario"><span>
+        Registro Estudiante
+    </span></button>
+
+        <!-- El Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form action="{{ url_for('module') }}" method="POST" id="registroEstudiante">
+                <!-- Información del estudiante -->
+                <fieldset>
+                    <legend>Datos del Estudiante</legend>
+
+                    <label for="tipo_documento">Tipo de Documento:</label>
+                    <select id="tipo_documento" name="tipo_documento" required>
+                        <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                        <option value="Cedula">Cédula</option>
+                        <option value="DIE">DIE (Documento de identificacion extranjero)</option>
+                       
+                    </select><br><br>
+
+                    <label for="numero_documento">Número de Documento:</label>
+                    <input type="text" id="numero_documento" name="numero_documento" required><br><br>
+
+                    <label for="nombres_estudiante">Nombres del Estudiante:</label>
+                    <input type="text" id="nombres_estudiante" name="nombres_estudiante" required><br><br>
+
+                    <label for="apellidos_estudiante">Apellidos del Estudiante:</label>
+                    <input type="text" id="apellidos_estudiante" name="apellidos_estudiante" required><br><br>
+
+                    <label for="grado">Grado:</label>
+                
+                    <select name="grado" id="grado">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                    </select><br><br>
+
+                    <label for="seccion">Sección:</label>
+                    <input type="text" id="seccion" name="seccion" required><br><br>
+
+                    <label for="jornada">Jornada:</label>
+                    <select name="jornada" id="jornada" required><br><br>
+                        <option value="">Seleccione : </option>
+                        <option value="Mañana">Mañana</option>
+                        <option value="Tarde">Tarde</option>
+                        
+                    </select>
+                </fieldset>
+
+                <!-- Información del acudiente -->
+                <fieldset>
+                    <legend>Datos del Acudiente</legend>
+                    <label for="id_acudiente">ID Acudiente:</label>
+                    <input type="text" id="id_acudiente" name="id_acudiente" required><br><br>
+
+                    <label for="nombre_acudiente">Nombre del Acudiente:</label>
+                    <input type="text" id="nombre_acudiente" name="nombre_acudiente" required><br><br>
+
+                    <label for="apellido_acudiente">Apellido del Acudiente:</label>
+                    <input type="text" id="apellido_acudiente" name="apellido_acudiente" required><br><br>
+
+                    <label for="telefono">Teléfono del Acudiente:</label>
+                    <input type="text" id="telefono" name="telefono" required><br><br>
+
+                    <label for="correo">Correo Electrónico del Acudiente:</label>
+                    <input type="email" id="correo" name="correo" required><br><br>
+
+                   <label for="profesor">Profesor Correspondiente:</label>
+    <select name="profesor" id="profesor" class="form-control" required>
+        {% if docentes %}
+            {% for docente in docentes %}
+                <option value="{{ docente[0] }} {{ docente[1] }}"
+                    {% if session['nombres'] == docente[0] and session['apellidos'] == docente[1] %}selected{% endif %}>
+                    {{ docente[0] }} {{ docente[1] }}
+                </option>
+            {% endfor %}
+        {% else %}
+            <option value="">No hay docentes disponibles</option>
+        {% endif %}
+    </select>
+
+                </fieldset>
+            <center>
+                <button type="submit" class="enviar"><span>Registrar</span></button>
+            </center>
+            </form> 
+   
+
+        </div>     
+    </div>
+    
+                <div class="container mt-5">
+                    <h2 class="text-center mb-4">Estudiantes</h2>
+                    <br><br>
+                                  <!-- Botón para abrir el Modal -->
+
+                    <div class="table-responsive" style="overflow-y: auto;overflow-x: auto;border: 1px solid #dee2e6;width: 100%;height: 101%;margin-left: -146px;margin-top: 4%;">
+                        <table id="estudiantesTable" class="table table-bordered align-middle" style="margin-left: 0;">
+                            <thead class="table-light" style="position: sticky; top: 0; z-index: 0; background-color: white;">
+                                <tr>
+                                    <th>Nombres Estudiante</th>
+                                    <th>Apellidos Estudiante</th>
+                                    <th>Grado</th>
+                                    <th>Sección</th>
+                                    <th>Jornada</th>
+                                    <th>Id Acudiente</th>
+                                    <th>Nombre Acudiente</th>
+                                    <th>Apellido Acudiente</th>
+                                    <th>Teléfono Acudiente</th>
+                                    <th>Correo Acudiente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for estudiante in estudiantes %}
+                                    <tr>
+                                        <td>{{ estudiante[0] }}</td>
+                                        <td>{{ estudiante[1] }}</td>
+                                        <td>{{ estudiante[2] }}</td>
+                                        <td>{{ estudiante[3] }}</td>
+                                        <td>{{ estudiante[4] }}</td>
+                                        <td>{{ estudiante[5] }}</td>
+                                        <td>{{ estudiante[6] }}</td>
+                                        <td>{{ estudiante[7] }}</td>
+                                        <td>{{ estudiante[8] }}</td>
+                                        <td>{{ estudiante[9] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                         <h5 style="margin-top: 30px;"><hr></h5>
+      <br><br>
+      <h1>Estadísticas por proceso</h1>
+      <button class="excel" id="exportarEstudiantes"><span>Exportar Excel</span></button>
+<div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 200px; background: #fff; border-radius: 50px; height: 300px">
+        <h5>Estudiantes por Grado</h5>
+        <canvas id="chartGrado" width="400" height="250"></canvas>
+    </div>
+    <div style="flex: 1;min-width: 181px;height: 263px;background: #fff;border-radius: 50px;">
+        <h5>Distribución por Jornada</h5>
+        <canvas id="chartJornada" width="400" height="250" style="margin-left: 29%;"></canvas>
+    </div>
+</div>
+
+
+
+                    
+                
+                <script>
+                    $(document).ready(function() {
+                        $('#estudiantesTable').DataTable({
+                            "paging": true,
+                            "lengthChange": true,
+                            "searching": true,
+                            "ordering": true,
+                            "info": true,
+                            "autoWidth": false,
+                            "responsive": true,  // Responsivo para móviles
+                            "language": {
+                                "lengthMenu": "Mostrar _MENU_ registros por página",
+                                "zeroRecords": "No se encontraron registros",
+                                "info": "Mostrando página _PAGE_ de _PAGES_",
+                                "infoEmpty": "No hay registros disponibles",
+                                "infoFiltered": "(filtrado de _MAX_ registros en total)",
+                                "search": "Buscar:",
+                                "paginate": {
+                                    "previous": "Anterior",
+                                    "next": "Siguiente"
+                                }
+                            }
+                        });
+                    });
+
+
+                    document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("estudiantesTable");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    const estudiantesPorGrado = {};
+    const estudiantesPorJornada = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+
+        const grado = celdas[2]?.innerText.trim();     // Columna Grado
+        const jornada = celdas[4]?.innerText.trim();   // Columna Jornada
+
+        // Contar estudiantes por gra   do
+        if (grado in estudiantesPorGrado) {
+            estudiantesPorGrado[grado]++;
+        } else {
+            estudiantesPorGrado[grado] = 1;
+        }
+
+        // Contar estudiantes por jornada
+        if (jornada in estudiantesPorJornada) {
+            estudiantesPorJornada[jornada]++;
+        } else {
+            estudiantesPorJornada[jornada] = 1;
+        }
+    });
+
+    // Datos para gráfico de barras (Grado vs Estudiantes)
+    const grados = Object.keys(estudiantesPorGrado);
+    const cantidadEstudiantes = Object.values(estudiantesPorGrado);
+
+    new Chart(document.getElementById('chartGrado'), {
+        type: 'bar',
+        data: {
+            labels: grados,
+            datasets: [{
+                label: 'Cantidad de Estudiantes',
+                data: cantidadEstudiantes,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Datos para gráfico de pastel (Jornada)
+    const jornadas = Object.keys(estudiantesPorJornada);
+    const cantidadPorJornada = Object.values(estudiantesPorJornada);
+
+    new Chart(document.getElementById('chartJornada'), {
+        type: 'pie',
+        data: {
+            labels: jornadas,
+            datasets: [{
+                data: cantidadPorJornada,
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#9966FF']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+
+
+document.getElementById("exportarEstudiantes").addEventListener("click", function () {
+        // Selecciona la tabla por ID
+        var tabla = document.getElementById("estudiantesTable");
+
+        // Convierte la tabla en una hoja de cálculo
+        var wb = XLSX.utils.table_to_book(tabla, { sheet: "Estudiantes" });
+
+        // Exporta a un archivo .xlsx
+        XLSX.writeFile(wb, "estudiantes.xlsx");
+    });
+
+
+ // Obtener elementos
+        var modal = document.getElementById("myModal");
+        var btn = document.getElementById("openModalBtn");
+        var span = document.getElementsByClassName("close")[0];
+
+        // Abrir el Modal cuando se presiona el botón
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // Cerrar el Modal cuando se presiona la "X"
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Cerrar el Modal si el usuario hace clic fuera del Modal
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        
+document.getElementById("id_acudiente").addEventListener("input", function() {
+    let cedula = this.value;
+    if (cedula.length < 3) return; // espera mínimo 3 caracteres
+
+    fetch(`/buscar_acudiente?cedula=${cedula}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById("nombre_acudiente").value = data.nombre;
+                document.getElementById("apellido_acudiente").value = data.apellido;
+                document.getElementById("telefono").value = data.telefono;
+                document.getElementById("correo").value = data.correo;
+            } else {
+                document.getElementById("nombre_acudiente").value = "No encontrado";
+                document.getElementById("apellido_acudiente").value = "No encontrado";
+                document.getElementById("telefono").value = "No encontrado";
+                document.getElementById("correo").value = "No encontrado";
+            }
+        });
+});
+                </script>
+                
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+       
+        </main>
+    </div>
+    <!-- JavaScript para abrir y cerrar el modal -->
+
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+ </body>
+</body>
+</html>

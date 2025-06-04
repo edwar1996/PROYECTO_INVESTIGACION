@@ -1,0 +1,186 @@
+        /* Estilo global */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+      
+      body, html {
+          height: 100%;
+          font-family: 'Poppins', sans-serif; /* Usando la fuente Poppins */
+      }
+      
+      /* Contenedor principal */
+      .container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background-image: url('/static/img/fondo.png');
+          background-size: cover;
+          background-position: center;
+          opacity: 0.9;  /* Menos opaco */
+          position: relative;
+      }
+      
+      /* Línea vertical centrada */
+      .container::before {
+          content: '';
+          position: absolute;
+          top: 30%; /* La línea comienza un poco más abajo */
+          bottom: 30%; /* La línea termina un poco antes de llegar al fondo */
+          left: 50%;
+          width: 4px;
+          background-color: #fff;
+          opacity: 0.7;
+      }
+      
+      /* Contenedor del logo */
+      .logo-container {
+          width: 200px;
+          padding-right: 30px;
+          text-align: center;
+      }
+      
+      /* Logo */
+      .logo {
+          max-width: 100%;
+      }
+      
+      /* Contenedor del formulario de login */
+      .login-container {
+          width: 300px;
+          padding-left: 30px;
+          background-color: transparent; /* Sin fondo */
+          border-radius: 10px;
+          padding: 20px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra suave para darle un toque elegante */
+          margin-left: 261px;
+      }
+      
+      /* Título del formulario */
+      h2 {
+          text-align: center;
+          margin-bottom: 20px;
+      }
+      
+      /* Estilo de los campos de formulario */
+      .form-group {
+          margin-bottom: 15px;
+      }
+      
+      label {
+          display: block;
+          font-size: 14px;
+          margin-bottom: 5px;
+      }
+      
+      input {
+          width: 100%;
+          padding: 10px;
+          font-size: 16px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+      }
+      
+      input:focus {
+          outline: none;
+          border-color: #007BFF;
+      }
+      
+      /* Estilo del botón */
+      button.btn {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+        border: 2px solid #73e586; /* Borde del botón */
+        border-radius: 50px; /* Bordes redondeados */
+        background-color: transparent; /* Fondo transparente */
+        color: #73e586; /* Color del texto */
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        outline: none; /* Sin contorno */
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(115, 229, 134, 0.2); /* Sombra sutil */
+        margin-left: 50px;
+      }
+      
+      button.btn:hover {
+        background-color: #73e586; /* Fondo verde brillante en hover */
+        color: rgb(64, 51, 158); /* Texto blanco */
+        border-color: #73e586; /* Mantener el borde verde brillante */
+        transform: translateY(-3px); /* Efecto de elevación */
+        box-shadow: 0 8px 20px rgba(115, 229, 134, 0.3); /* Aumentar sombra en hover */
+      }
+      
+      /* Estilos para el contenedor */
+.niños {
+  display: flex; /* Esto pone las imágenes juntas en una fila */
+  gap: 10px; /* Espacio entre las imágenes */
+  justify-content: center; /* Centra las imágenes en el contenedor */
+  align-items: center; /* Alinea las imágenes verticalmente */
+}
+
+
+/* Animación al pasar el ratón por encima */
+.niños img:hover {
+  transform: scale(1.2); /* Aumenta el tamaño de la imagen al 120% */
+}
+
+/* Input container */
+.input-container {
+  position: relative;
+  margin: 20px;
+}
+
+/* Input field */
+.input-field {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid #000000;
+  outline: none;
+  background-color: transparent;
+  color: #000000;
+}
+
+/* Input label */
+.input-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 16px;
+  color: rgba(204, 204, 204, 0);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* Input highlight */
+.input-highlight {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: #73e586;
+  transition: all 0.3s ease;
+}
+
+/* Input field:focus styles */
+.input-field:focus + .input-label {
+  top: -20px;
+  font-size: 12px;
+  color: #73e586;
+}
+
+.input-field:focus + .input-label + .input-highlight {
+  width: 100%;
+}
+
+/* Placeholder color */
+.input-field::placeholder {
+  color: black; /* Cambia el color del placeholder a negro */
+}
+

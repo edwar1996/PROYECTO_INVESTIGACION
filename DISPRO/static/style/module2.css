@@ -1,0 +1,148 @@
+
+
+/* Estilo para las etiquetas del formulario */
+form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Estilo para los inputs */
+form input[type="text"],
+form input[type="password"],
+.telefono,
+select, textarea,
+form input[type="email"] {
+    width: 95%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+
+
+form input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* Estilo para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+table th {
+    background-color: #315554; /* Color neutro */
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+table td {
+    background-color: #f9f9f9;
+}
+
+/* Estilo para la fila cuando no hay usuarios */
+table td[colspan="6"] {
+    text-align: center;
+    color: #888;
+}
+
+/* Estilo para los botones de acción */
+button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+button.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+button.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Estilo para el modal */
+.modal {
+    display: none; /* Ocultar por defecto */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-top: 60px;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 70%;
+    max-width: 600px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding-top: 10px;
+}
+
+.modal-body input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.modal-footer {
+    text-align: right;
+}
+
+/* Estilo para los mensajes de éxito o error */
+
+p[style="color: green;"] {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+p[style="color: red;"] {
+    background-color: #f8d7da;
+    color: #721c24;
+}

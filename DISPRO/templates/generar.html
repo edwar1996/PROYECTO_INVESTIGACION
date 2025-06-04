@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+<link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<!-- JS de jQuery y DataTables -->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+<style>
+
+.extra-item {
+    display: none;
+    background-color: #1ab394;
+    border-radius: 15px;
+    font-size: 16px;
+    color: #ffff;
+    margin-left: 20px;
+    transition: all 0.3s ease-in-out;
+    height: 43px;
+}
+
+  
+  .cedula {
+    width: 14%;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid #ccd6dd;
+    border-radius: 6px;
+    background-color: #ffffff;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  .cedula:focus {
+    border-color: #a8200e;
+    box-shadow: 0 0 0 3px rgba(29, 114, 184, 0.2);
+    outline: none;
+  }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+                    &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                    <li><a href="{{ url_for('docente.docente') }}"><i class="fas fa-home"></i> Estudiantes</a></li>
+                    <li><a href="#" id="generar-link"><i class="fas fa-users"></i> Generar</a></li>
+                    <li class="extra-item" id="item1"><a href="{{ url_for('docente.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>  &nbsp;&nbsp;Situación 1</a></li>
+                    <li class="extra-item" id="item2"><a href="{{ url_for('generar2.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 2</a></li>
+                    <li class="extra-item" id="item3"><a href="{{ url_for('generar3.generarf') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 3</a></li>
+
+                    <li><a href="{{ url_for('estado_estudiantil.mostrar_casos') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+ 
+                <li><a href="{{ url_for('docente.ver_observaciones') }}" onclick="showSection('estadisticas')"><i class="fa-brands fa-slack"></i> Observaciones</a></li>
+                                   <li>
+    <a href="{{ url_for('estado_estudiantil.mostrar_historico') }}">
+        <i class="fas fa-archive"></i> Historial
+    </a>
+</li>
+                
+                </ul>
+            </nav>
+
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                    <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+                
+            <header class="header">
+                <div class="greeting">
+                    <h2>Proceso Disciplinario 1</h2>
+                </div>
+                
+                <div class="user-info">
+                    <img src="/static/img/inem.png" alt="" srcset="" class="img-user">
+                    <div class="user-details">
+                    {% if session['rol'] %}
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    {% endif %}
+                    </div>
+                </div>
+            </header>
+            
+
+            <!-- Contenido de las diferentes secciones -->
+            <section id="inicio" class="section-content">
+                <div>
+                    <label for="cedulaInput" >Número de Identificación:</label>
+                    <input type="Number" id="cedulaInput" placeholder="Ingrese número de identificación" class="cedula">
+                    <button onclick="generarPDF()" class="eliminar-usuario" style="height: 42px;"><span>Generar PDF</span></button>
+                </div>
+               
+                                    
+                 <!-- Botão para abrir o modal -->
+    <button id="openModalBtn" class="crear-usuario"><span>Registrar Situación</span></button>
+    <div id="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                    <script>
+        
+                        alert("{{ message }}");
+                  
+                </script>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+
+    <!-- O Modal -->
+    <div id="myModal" class="modal">
+        <!-- Conteúdo do Modal -->
+        <div class="modal-content">
+            
+        <div class="modal-header">
+             <h2>Formulario de Registro</h2>
+            <span class="close">&times;</span>
+           
+        </div>
+            <form id="modalForm" method="POST" action="{{ url_for('docente.buscar_estudiante') }}" enctype="multipart/form-data">
+                <!-- Campo para el Número de TI o CC -->
+                <label for="numeroTI">Número de TI ou CC:</label>
+                <input type="text" id="numeroTI" name="numeroTI" required><br><br>
+    
+                <!-- Campo para los nombres y apellidos del estudiante -->
+                <label for="nombresEstudiante">Nombres Estudiante:</label>
+                <input type="text" id="nombresEstudiante" name="nombresEstudiante" readonly><br><br>
+    
+                <label for="apellidosEstudiante">Apellidos Estudiante:</label>
+                <input type="text" id="apellidosEstudiante" name="apellidosEstudiante" readonly><br><br>
+
+                <label for="grado">Grado:</label>
+                <input type="text" id="grado" name="grado" readonly><br><br>
+
+                <label for="seccion">Sección:</label>
+                <input type="text" id="seccion" name="seccion" readonly><br><br>
+
+                <label for="jornada">Jornada:</label>
+                <input type="text" id="jornada" name="jornada" readonly><br><br>
+    
+                <label for="idacu">Cedúla Acudiente:</label>
+                <input type="text" id="idacu" name="idacu" readonly><br><br>
+
+                <label for="nom_acu">Nombre Acudiente:</label>
+                <input type="text" id="nom_acu" name="nom_acu" readonly><br><br>
+
+                <label for="ape_acu">Apellido Acudiente:</label>
+                <input type="text" id="ape_acu" name="ape_acu" readonly><br><br>
+
+                <label for="tel_acu">Telefono Acudiente:</label>
+                <input type="Number" id="tel_acu" name="tel_acu" class="telefono" readonly><br><br>
+
+                <label for="cor_acu">Correo Acudiente:</label>
+                <input type="email" id="cor_acu" name="cor_acu" readonly><br><br>
+                <!-- Campo para la falta cometida -->
+                <label for="faltaCometida">Falta cometida:</label>
+                <input type="text" id="faltaCometida" name="faltaCometida" required><br><br>
+
+                 <label for="profesor">Profesor:</label>
+              <input type="text" name="profesor" id="profesor" value="{{ session['nombres'] }} {{ session['apellidos'] }}" readonly>
+                <!-- Campo para los descargos -->
+                <label for="descargos">Descargos:</label>
+                <textarea id="descargos" name="descargos" required></textarea><br><br>
+
+                 <!-- Campo para seleccionar una imagen -->
+    <label for="rutafoto">Evidencia fotográfica:</label>
+    <input type="file" id="rutafoto" name="rutafoto" accept="image/*"><br><br>
+    
+                <!-- Campo para el compromiso del estudiante -->
+                <label for="compromissoEstudante">Compromiso de estudiante:</label>
+                <textarea id="compromissoEstudante" name="compromissoEstudante" required></textarea><br><br>
+                  <input type="checkbox" id="acepta_documento" required>
+Como estudiante, acepto este documento y autorizo la firma de mi acudiente en mi representación.
+<br><br>
+    <center>
+
+                <button type="submit" class="enviar"><span>Enviar</span></button>
+             
+    </center>      
+            </form>
+        </div>
+      
+        
+    </div>
+
+        <!-- Tabla para mostrar los registros -->
+        <table class="table table-bordered table-striped mt-3 dataTable no-footer" id="userTable">
+            <thead>
+                <tr>
+                    <th>Identificación</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Grado</th>
+                    <th>Sección</th>
+                    <th>Jornada</th>
+                    <th>Id Acudiente</th>
+                    <th>Nombre Acudiente</th>
+                    <th>Apellidos Acudiente</th>
+                    <th>Correo Acudiente</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                    <th>Falta Cometida</th>
+                    <th>Descargos</th>
+                    <th>Compromiso</th>
+                    <th>Evidencia fotográfica</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if registros %}
+                    {% for registro in registros %}
+                        <tr>
+                            <td>{{ registro[0] }}</td>
+                            <td>{{ registro[1] }}</td>
+                            <td>{{ registro[2] }}</td>
+                            <td>{{ registro[3] }}</td>
+                            <td>{{ registro[4] }}</td>
+                            <td>{{ registro[5] }}</td>
+                            <td>{{ registro[6] }}</td>
+                            <td>{{ registro[7] }}</td>
+                            <td>{{ registro[8] }}</td>
+                            <td>{{ registro[9] }}</td>
+                            <td>{{ registro[10] }}</td>
+                            <td>{{ registro[11] }}</td>
+                            <td>{{ registro[12] }}</td>
+                            <td>{{ registro[13] }}</td>
+                            <td>{{ registro[14] }}</td>
+                            <td>
+    {% if registro[15] %}
+        <button onclick="verEvidencia('{{ registro[15] }}')" class="ver">
+           <span>Evidencia</span>
+        </button>
+    {% else %}
+        Sin Evidencia
+    {% endif %}
+</td>
+
+
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="15">No se encontraron registros.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+      <h5 style="margin-top: 30px;"><hr></h5>
+      <br><br>
+      <h1>Estadísticas por proceso</h1>
+      <button class="excel"><span>Exportar Excel</span></button>
+<div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 200px; background: #fff; border-radius: 50px; height: 300px">
+        <h5>Estudiantes por Grado</h5>
+        <canvas id="chartGrado" width="400" height="250"></canvas>
+    </div>
+    <div style="flex: 1;min-width: 181px;height: 263px;background: #fff;border-radius: 50px;">
+        <h5>Distribución por Jornada</h5>
+        <canvas id="chartJornada" width="400" height="250" style="margin-left: 29%;"></canvas>
+    </div>
+</div>
+
+
+
+        
+    
+                
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+       
+        </main>
+    </div>
+    <!-- JavaScript para abrir y cerrar el modal -->
+
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <script src="/static/js/proceso_1.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
+    //estadisticas - grafucas etc..
+document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("userTable");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    const estudiantesPorGrado = {};
+    const estudiantesPorJornada = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+
+        const grado = celdas[3]?.innerText.trim();     // Columna Grado
+        const jornada = celdas[5]?.innerText.trim();   // Columna Jornada
+
+        // Contar estudiantes por grado
+        if (grado in estudiantesPorGrado) {
+            estudiantesPorGrado[grado]++;
+        } else {
+            estudiantesPorGrado[grado] = 1;
+        }
+
+        // Contar estudiantes por jornada
+        if (jornada in estudiantesPorJornada) {
+            estudiantesPorJornada[jornada]++;
+        } else {
+            estudiantesPorJornada[jornada] = 1;
+        }
+    });
+
+    // Datos para gráfico de barras (Grado vs Estudiantes)
+    const grados = Object.keys(estudiantesPorGrado);
+    const cantidadEstudiantes = Object.values(estudiantesPorGrado);
+
+    new Chart(document.getElementById('chartGrado'), {
+        type: 'bar',
+        data: {
+            labels: grados,
+            datasets: [{
+                label: 'Cantidad de Estudiantes',
+                data: cantidadEstudiantes,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Datos para gráfico de pastel (Jornada)
+    const jornadas = Object.keys(estudiantesPorJornada);
+    const cantidadPorJornada = Object.values(estudiantesPorJornada);
+
+    new Chart(document.getElementById('chartJornada'), {
+        type: 'pie',
+        data: {
+            labels: jornadas,
+            datasets: [{
+                data: cantidadPorJornada,
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#9966FF']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+
+ // Mostrar el modal al hacer clic en el botón
+ var modal = document.getElementById("myModal");
+    var btn = document.getElementById("openModalBtn");
+    var span = document.getElementsByClassName("close")[0];
+
+    btn.onclick = function() {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    // Cuando se hace clic fuera del modal, lo cierra
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Función para buscar el estudiante por el número de TI o CC
+    document.getElementById('numeroTI').addEventListener('input', function () {
+        var numeroTI = this.value;
+
+        if (numeroTI.length > 0) {
+            fetch(`/buscar_estudiante?numero_documento=${numeroTI}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.nombres_estudiante && data.apellidos_estudiante && data.grado && data.seccion) {
+                        // Rellenar los campos de Nombres y Apellidos
+                        document.getElementById('nombresEstudiante').value = data.nombres_estudiante;
+                        document.getElementById('apellidosEstudiante').value = data.apellidos_estudiante;
+                        document.getElementById('grado').value = data.grado;
+                        document.getElementById('seccion').value = data.seccion;
+                        document.getElementById('jornada').value = data.jornada;
+                        document.getElementById('idacu').value = data.idacu;
+                        document.getElementById('nom_acu').value = data.nom_acu;
+                        document.getElementById('ape_acu').value = data.ape_acu;
+                        document.getElementById('tel_acu').value = data.tel_acu;
+                        document.getElementById('cor_acu').value = data.cor_acu;
+                    } else {
+                        // Si no se encuentra el estudiante, limpiar los campos
+                        document.getElementById('nombresEstudiante').value = 'No encontrado';
+                        document.getElementById('apellidosEstudiante').value = 'No encontrado';
+                        document.getElementById('grado').value = 'No encontrado';
+                        document.getElementById('seccion').value = 'No encontrado';
+                        document.getElementById('jornada').value = 'No encontrado';
+                        document.getElementById('idacu').value = 'No encontrado';
+                        document.getElementById('nom_acu').value = 'No encontrado';
+                        document.getElementById('ape_acu').value = 'No encontrado';
+                        document.getElementById('tel_acu').value =0;
+                        document.getElementById('cor_acu').value = 'No encontrado';
+
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    });
+
+
+    //para situacionesss
+    document.getElementById('generar-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        ['item1', 'item2', 'item3'].forEach(function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+
+
+    $(document).ready(function() {
+        // Verificar si la tabla ya tiene DataTable inicializado
+        if (!$.fn.dataTable.isDataTable('#userTable')) {
+            $('#userTable').DataTable({
+                "scrollX": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "info": true, // Mostrar información de la tabla
+                "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                }
+            });
+        }
+    });
+
+
+    document.querySelector(".excel").addEventListener("click", function () {
+        // Obtener la tabla
+        var tabla = document.getElementById("userTable");
+
+        // Convertir la tabla a una hoja de cálculo
+        var wb = XLSX.utils.table_to_book(tabla, { sheet: "Registros" });
+
+        // Exportar a archivo Excel
+        XLSX.writeFile(wb, "registros.xlsx");
+    });
+
+
+
+
+function verEvidencia(imagen) {
+    // Verificamos si hay una imagen
+    if (imagen) {
+        // Generamos la URL completa para la imagen
+        var url = '{{ url_for("static", filename="") }}' + imagen.replace('static/', '');
+        // Abrimos la imagen en una nueva ventana
+        window.open(url, '_blank', 'width=800,height=600,resizable=yes');
+    } else {
+        // Si no hay imagen, mostramos un mensaje
+        alert('No hay evidencia disponible.');
+    }
+}
+
+</script>
+
+ </body>
+</body>
+</html>

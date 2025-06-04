@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISPRO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style/module.css?v=1.0">
+    <!-- Font Awesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
+<!-- CSS de DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+<!-- JS de jQuery y DataTables -->
+<script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="/static/style/module2.css?v=1.0">
+<link rel="stylesheet" href="/static/style/botones.css?v=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<style>
+
+.extra-item {
+    display: none;
+    background-color: #1ab394;
+    border-radius: 15px;
+    font-size: 16px;
+    color: #ffff;
+    margin-left: 20px;
+    transition: all 0.3s ease-in-out;
+    height: 43px;
+}
+
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fas fa-bars"></i>
+                    &nbsp;      D I S P R O </h2>
+            </div>
+            <nav class="nav">
+                <ul>
+                           <li><a href="{{ url_for('docente.docente') }}"><i class="fas fa-home"></i> Estudiantes</a></li>
+                    <li><a href="#" id="generar-link"><i class="fas fa-users"></i> Generar</a></li>
+                    <li class="extra-item" id="item1"><a href="{{ url_for('docente.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>  &nbsp;&nbsp;Situación 1</a></li>
+                    <li class="extra-item" id="item2"><a href="{{ url_for('generar2.generar') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 2</a></li>
+                    <li class="extra-item" id="item3"><a href="{{ url_for('generar3.generarf') }}" id="generar-link"><i class="fa-solid fa-file-contract"></i>   &nbsp;&nbsp; Situación 3</a></li>
+
+                    <li><a href="{{ url_for('estado_estudiantil.mostrar_casos') }}" onclick="showSection('estadisticas')"><i class="fas fa-chart-line"></i> Estado Estudiantil</a></li>
+ 
+                <li><a href="{{ url_for('docente.ver_observaciones') }}" onclick="showSection('estadisticas')"><i class="fa-brands fa-slack"></i> Observaciones</a></li>
+                                   <li>
+    <a href="{{ url_for('estado_estudiantil.mostrar_historico') }}">
+        <i class="fas fa-archive"></i> Historial
+    </a>
+</li>
+                </ul>
+            </nav>
+<br><br>
+            <!-- Nombre del usuario en la parte superior -->
+            <div class="user-name">
+
+            </div>
+
+            <!-- Menú inferior con configuración y cerrar sesión -->
+            <div class="bottom-nav">
+                <ul>
+                     <li><a href="{{ url_for('configuracion') }}"><i class="fas fa-cog"></i> Configuración</a></li>
+                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="greeting">
+                     <h2>Listado de Estudiantes con Proceso Activo</h2>
+                    <div id="notificacionIcono">
+                    <button>🔔</button>
+                    </div>
+                    <div id="notificacionAlerta" style="
+                        display: none;
+                    ">
+                        🔔 Tienes {{ cantidad_casos }} caso{{ 's' if cantidad_casos != 1 }} activo{{ 's' if cantidad_casos != 1 }} pendiente{{ 's' if cantidad_casos != 1 }} de seguimiento.
+                    </div>
+                
+                </div>
+
+                       <div class="user-info">
+                    <img src="/static/img/inem.png" alt="" srcset="" class="img-user">
+                    
+                    {% if session['rol'] %}
+                    <div class="user-details">
+                        <p><strong>Rol:</strong> {{ session['rol'] }}</p>
+                        <p><strong>Nombre:</strong> {{ session['nombres'] }} {{ session['apellidos'] }}</p>
+                        <p><strong>Correo:</strong> {{ session['correo'] }}</p>
+                    {% endif %}
+                    </div>
+                </div>
+                        <!-- Ícono de Notificación -->
+
+
+                </header>
+
+                <section id="inicio" class="section-content">
+                          {% if estudiantes %}
+<table class="table table-bordered table-striped mt-3 dataTable no-footer" id="userTable">
+    <thead>
+        <tr>
+            <th>Identificación</th>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Grado</th>
+            <th>Sección</th>
+            <th>Jornada</th>
+            <th>Nombre Acudiente</th>
+            <th>Apellido Acudiente</th>
+            <th>Correo Acudiente</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Falta Cometida</th>
+            <th>Situación</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for est in estudiantes %}
+        <tr>
+            <td>{{ est[0] }}</td>
+            <td>{{ est[1] }}</td>
+            <td>{{ est[2] }}</td>
+            <td>{{ est[3] }}</td>
+            <td>{{ est[4] }}</td>
+            <td>{{ est[5] }}</td>
+            <td>{{ est[7] }}</td>
+            <td>{{ est[8] }}</td>
+            <td>{{ est[9] }}</td>
+            <td>{{ est[10] }}</td>
+            <td>{{ est[11] }}</td>
+            <td>{{ est[12] }}</td>
+            <td>{{ est[13] }}</td>
+            <td>
+                <button class="eliminar-usuario" onclick="cerrarProceso('{{ est[0] }}')"><span>Cerrar</span></button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <p>No hay estudiantes con proceso activo.</p>
+{% endif %}
+<h5 style="margin-top: 20px;"><hr></h5>
+ <br><br>
+ <h1>Estadísticas por proceso</h1>
+<button class="excel" id="exportarProcesoExcel"><span>Exportar Excel</span></button>
+
+<br><br>
+
+<h5 style="margin-top: 30px;">Estadísticas Generales</h5>
+<div style="display: flex; justify-content: space-between; gap: 20px;">
+    <div style="flex: 1; min-width: 200px; background: #fff; border-radius: 50px; height: 300px">
+        <h6>Estudiantes por Grado</h6>
+        <canvas id="chartGrado2" width="400" height="250"></canvas>
+    </div>
+    <div style="flex: 1;min-width: 181px;height: 263px;background: #fff;border-radius: 50px;">
+        <h6>Distribución por Jornada</h6>
+        <canvas id="chartJornada2" width="400" height="250" style="margin-left: 29%;"></canvas>
+    </div>
+</div>
+
+
+                    </div>
+                    
+                </div>
+               
+            </div>
+            
+            
+            </section>
+
+            <section id="configuracion" class="section-content" style="display: none;">
+                <h2>Configuraciones</h2>
+                <p>Este es el área donde puedes gestionar las configuraciones del sistema.</p>
+            </section>
+
+       
+        </main>
+    </div>
+    <!-- JavaScript para abrir y cerrar el modal -->
+<script>
+    $(document).ready(function() {
+        // Verificar si la tabla ya tiene DataTable inicializado
+        if (!$.fn.dataTable.isDataTable('#userTable2')) {
+            $('#userTable2').DataTable({
+                "scrollX": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "info": true, // Mostrar información de la tabla
+                "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                }
+            });
+        }
+    });
+
+
+    document.getElementById("notificacionIcono").addEventListener("click", function() {
+        var alerta = document.getElementById("notificacionAlerta");
+        alerta.style.display = "block";
+
+        // Ocultar después de 10 segundos
+        setTimeout(function() {
+            alerta.style.display = "none";
+        }, 3000); // 10,000 milisegundos = 10 segundos
+    });
+
+
+    function cerrarProceso(identificacion) {
+    if (confirm("¿Deseas cerrar este caso?")) {
+        fetch(`/estado_estudiantil/cerrar_proceso2/${identificacion}`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Caso cerrado correctamente.");
+                window.location.reload(); // Recargar para actualizar tablas
+            } else {
+                alert("Error al cerrar el caso.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    }
+}
+
+    $(document).ready(function() {
+        // Verificar si la tabla ya tiene DataTable inicializado
+        if (!$.fn.dataTable.isDataTable('#userTable')) {
+            $('#userTable').DataTable({
+                "scrollX": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "info": true, // Mostrar información de la tabla
+                "lengthMenu": [10, 20, 30, 50], // Opciones de número de filas por página
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros en total)"
+                }
+            });
+        }
+    });
+        document.getElementById('generar-link').addEventListener('click', function(event) {
+        event.preventDefault();
+        ['item1', 'item2', 'item3'].forEach(function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        });
+    });
+    
+      
+document.addEventListener("DOMContentLoaded", function () {
+    const tabla = document.getElementById("userTable");
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    const estudiantesPorGrado = {};
+    const estudiantesPorJornada = {};
+
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll("td");
+
+        const grado = celdas[4]?.innerText.trim();    // Grado
+        const jornada = celdas[6]?.innerText.trim();  // Jornada
+
+        // Contar estudiantes por grado
+        if (grado in estudiantesPorGrado) {
+            estudiantesPorGrado[grado]++;
+        } else {
+            estudiantesPorGrado[grado] = 1;
+        }
+
+        // Contar estudiantes por jornada
+        if (jornada in estudiantesPorJornada) {
+            estudiantesPorJornada[jornada]++;
+        } else {
+            estudiantesPorJornada[jornada] = 1;
+        }
+    });
+
+    // --- Gráfico de barras por grado ---
+    const grados = Object.keys(estudiantesPorGrado);
+    const conteoGrados = Object.values(estudiantesPorGrado);
+
+    new Chart(document.getElementById('chartGrado2'), {
+        type: 'bar',
+        data: {
+            labels: grados,
+            datasets: [{
+                label: 'Cantidad de Estudiantes',
+                data: conteoGrados,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // --- Gráfico de pastel por jornada ---
+    const jornadas = Object.keys(estudiantesPorJornada);
+    const conteoJornadas = Object.values(estudiantesPorJornada);
+
+    new Chart(document.getElementById('chartJornada2'), {
+        type: 'pie',
+        data: {
+            labels: jornadas,
+            datasets: [{
+                data: conteoJornadas,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#9966FF',
+                    '#4BC0C0'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+
+document.getElementById('exportarProcesoExcel').addEventListener('click', function () {
+    const tabla = document.getElementById('userTable');
+    const filas = tabla.rows;
+    let datos = [];
+
+    for (let i = 0; i < filas.length; i++) {
+        const celdas = filas[i].cells;
+        let fila = [];
+
+        // Excluir la última celda (botones de acción)
+        for (let j = 0; j < celdas.length - 1; j++) {
+            fila.push(celdas[j].innerText.trim());
+        }
+
+        datos.push(fila);
+    }
+
+    // Crear hoja de Excel desde array de arrays
+    const ws = XLSX.utils.aoa_to_sheet(datos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Procesos");
+
+    // Guardar archivo Excel
+    XLSX.writeFile(wb, "ProcesosEstudiantes.xlsx");
+});
+</script>
+     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     <!-- Cargar jQuery primero -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Cargar DataTables después de jQuery -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+ </body>
+</body>
+</html>

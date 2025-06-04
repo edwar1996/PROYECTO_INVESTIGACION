@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>DISPRO - LOGIN</title>
+            <link rel="stylesheet" href="/static/style/style.css?v=1.0">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap');
+
+                .titulo-login-animado {
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 4rem;
+                    letter-spacing: 5px;
+                    color: #73e586;  /* Use transparent to show only the background */
+                    text-align: center;
+                    margin: 0;
+                    padding: 0;
+                    background: linear-gradient(90deg, #00c6ff, #0072ff, #00c6ff); /* Gradient background */
+                    background-size: 200% 200%; /* Adjust background size for clarity */
+                    background-clip: text; /* Apply background only to text */
+                    animation: gradientShift 6s ease infinite, fadeIn 1.5s ease-out;
+                    text-shadow: 0 0 12px rgba(0, 114, 255, 0.8); /* Stronger shadow for better contrast */
+                }
+                
+                @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            </style>
+            
+            
+        </head>
+        <body>
+            <div>
+                <!-- Mensajes flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                    <script type="text/javascript">
+                   
+                            alert("{{ message }}");
+                    
+                    </script>
+                        {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+            
+            <div class="container">
+                <!-- Contenedor del logo -->
+                <div class="logo-container">
+                    <img src="/static/img/inem.png" alt="Logo" class="logo">
+                    <br><br>
+                    <h1 class="titulo-login-animado">DISPRO</h1>
+                  
+                </div>
+                
+
+                
+                <!-- Formulario de login -->
+                <div class="login-container">
+                    <form action="#" method="POST">
+                        <h5 class="titulo-login-animado" style="font-size: 2rem;">Iniciar Sesión</h5><br>
+                        <div class="niños">
+                            <img src="/static/img/niño2.png" alt="" srcset="" style="
+            height: 137px;">
+                            <img src="/static/img/niña1.png" alt="" srcset="" style="
+            height: 137px;">
+                        </div>
+                      
+                       
+                        <div class="form-group">
+                            <div class="input-container">
+                                <input placeholder="Ingresa Usuario" class="input-field" type="text" name="username" id="username">
+                                <label for="username" class="input-label">Ingrese su Usuario:</label>
+                                <span class="input-highlight"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="input-container">
+                                <input placeholder="Contraseña" class="input-field" type="password" name="password" id="password">
+                                <label for="password" class="input-label">Ingrese su contraseña</label>
+                                <span class="input-highlight"></span>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </body>
+        </html>
+        

@@ -1,0 +1,98 @@
+/* Contenedor para centrar la tabla */
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Asegura que ocupe toda la altura de la ventana */
+    left: 50px;
+}
+
+/* Estilo para la tabla */
+.table {
+  
+    color: #333;
+    width: 90%; /* Ajusta el ancho de la tabla */
+    border: 1px solid #dee2e6; /* Borde para la tabla */
+    border-radius: 15px; /* Bordes redondeados para la tabla */
+    box-shadow: 0 4px 6px rgba(81, 117, 84, 0.747); /* Sombra ligera para la tabla */
+    margin-left: 50%;
+}
+
+/* Cabecera de la tabla */
+.table th {
+    background-color: #f5f5f5; /* Color neutro para el encabezado */
+    color: #333;
+    text-align: center;
+    font-weight: bold;
+    padding: 12px 15px;
+}
+
+/* Estilo para las celdas */
+.table td {
+    text-align: center;
+    padding: 10px 15px;
+    vertical-align: middle;
+    border: 1px solid #dee2e6; /* Borde en todas las celdas */
+}
+
+/* Fila seleccionada */
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Modificar el color de la paginación */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px; /* Bordes redondeados para los botones */
+    padding: 6px 12px;
+    margin: 0 3px;
+    font-size: 14px;
+    border: 1px solid #007bff; /* Borde alrededor del botón */
+}
+
+/* Hover sobre los botones de paginación */
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3; /* Cambio de color en el borde al hacer hover */
+}
+
+/* Borde alrededor de los botones "Siguiente" y "Anterior" */
+.dataTables_wrapper .dataTables_paginate .paginate_button.previous,
+.dataTables_wrapper .dataTables_paginate .paginate_button.next {
+    border-radius: 5px; /* Bordes redondeados */
+}
+
+/* Estilos para la barra de búsqueda */
+.dataTables_wrapper .dataTables_filter input {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 250px;
+}
+
+/* Resaltado en las filas */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #ffffff;
+}
+
+/* Mejorar la apariencia de las celdas */
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #f0eded;
+}
+
+/* Cabecera más sutil */
+.table-light th {
+    background-color: #315554; /* Color neutro */
+    border-radius: 4px;
+    color: #ffffff;
+}
+
+

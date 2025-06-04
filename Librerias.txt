@@ -1,0 +1,3 @@
+librerias 
+----
+pip install flask flask-sqlalchemy flask-wtf flask-login flask-migrate flask-mail jinja2 werkzeug requests pandas
